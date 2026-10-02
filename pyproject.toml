@@ -1,0 +1,38 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "luxtronik-mqtt-bridge"
+version = "0.1.0"
+description = "Read-only Lux_WS to MQTT bridge for openHABian and Windows"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+  "websockets>=15,<16", "aiomqtt>=2.4,<3", "defusedxml>=0.7.1,<0.8",
+  "tomli>=2,<3; python_version < '3.11'",
+  "async-timeout>=5,<6; python_version < '3.11'",
+]
+
+[project.scripts]
+luxtronik-mqtt = "luxtronik_mqtt.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8,<10", "pytest-asyncio>=1.4,<2", "ruff>=0.11,<1", "amqtt>=0.11.3,<0.12"]
+
+[tool.uv.dependency-groups]
+dev = {requires-python = ">=3.11"}
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/luxtronik_mqtt"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py39"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]

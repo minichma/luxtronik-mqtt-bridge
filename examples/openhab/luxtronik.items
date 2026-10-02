@@ -1,0 +1,5 @@
+Number:Temperature Luxtronik_Outdoor "Outside [%.1f °C]" { channel="mqtt:topic:luxbroker:heatpump:outdoor", unit="°C" }
+String Luxtronik_OutdoorQuality { channel="mqtt:topic:luxbroker:heatpump:outdoorQuality" }
+DateTime Luxtronik_OutdoorObserved { channel="mqtt:topic:luxbroker:heatpump:outdoorObserved" }
+String Luxtronik_Availability { channel="mqtt:topic:luxbroker:heatpump:availability" }
+Switch Luxtronik_OutdoorFresh "Outside reading is usable"

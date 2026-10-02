@@ -1,0 +1,13 @@
+// Requires MQTT binding and JSONPath transformation. Edit broker or reuse an existing Bridge.
+Bridge mqtt:broker:luxbroker "MQTT broker" [ host="mqtt.example.invalid", port=1883, secure=false ] {
+    Thing topic heatpump "Luxtronik" [
+        availabilityTopic="luxtronik/heatpump/v1/availability",
+        payloadAvailable="online", payloadNotAvailable="offline"
+    ] {
+        Channels:
+            Type number : outdoor "Outside temperature" [ stateTopic="luxtronik/heatpump/v1/readings/outdoor_temperature", transformationPattern="JSONPATH:$.value", unit="°C" ]
+            Type string : outdoorQuality "Outside reading quality" [ stateTopic="luxtronik/heatpump/v1/readings/outdoor_temperature", transformationPattern="JSONPATH:$.quality" ]
+            Type datetime : outdoorObserved "Outside reading timestamp" [ stateTopic="luxtronik/heatpump/v1/readings/outdoor_temperature", transformationPattern="JSONPATH:$.observed_at" ]
+            Type string : availability "Bridge availability" [ stateTopic="luxtronik/heatpump/v1/availability" ]
+    }
+}

@@ -1,0 +1,77 @@
+# Copy outside the checkout; run `luxtronik-mqtt --config PATH check` before use.
+# Copy outside the repository and edit there. These are reserved example hosts.
+[device]
+id = "heatpump"
+
+[luxtronik]
+url = "ws://192.0.2.10:8214/"
+subprotocol = "Lux_WS"
+password_file_env = "LUXTRONIK_PASSWORD_FILE"
+information_label = "Informationen"
+poll_interval_seconds = 30
+operation_timeout_seconds = 10
+stale_after_seconds = 120
+max_frame_bytes = 1048576
+
+[mqtt]
+host = "mqtt.example.invalid"
+port = 8883
+tls = true
+verify_certificate = true
+authentication = "password"
+username_file_env = "MQTT_USERNAME_FILE"
+password_file_env = "MQTT_PASSWORD_FILE"
+client_id = "luxtronik-heatpump"
+topic_prefix = "luxtronik/heatpump/v1"
+qos = 1
+retain = true
+
+[runtime]
+state_dir = "/var/lib/luxtronik-mqtt-bridge"
+
+# Paths verified on the German V3.89.3 test controller. Recheck on FW 3.92.
+[[sensors]]
+key = "outdoor_temperature"
+path = ["Temperaturen", "Außentemperatur"]
+type = "number"
+unit = "degC"
+
+[[sensors]]
+key = "flow_temperature"
+path = ["Temperaturen", "Vorlauf"]
+type = "number"
+unit = "degC"
+
+[[sensors]]
+key = "return_temperature"
+path = ["Temperaturen", "Rücklauf"]
+type = "number"
+unit = "degC"
+
+[[sensors]]
+key = "compressor_hours"
+path = ["Betriebsstunden", "Betriebstund. VD1"]
+type = "number"
+unit = "h"
+
+[[sensors]]
+key = "compressor_starts"
+path = ["Betriebsstunden", "Impulse Verdichter 1"]
+type = "number"
+
+[[sensors]]
+key = "compressor_running"
+path = ["Ausgänge", "Verdichter"]
+type = "boolean"
+
+[[sensors]]
+key = "heat_total"
+path = ["Energiemonitor", "Wärmemenge", "Gesamt"]
+type = "number"
+unit = "kWh"
+
+[[sensors]]
+key = "energy_input_total"
+path = ["Energiemonitor", "Eingesetzte Energie", "Gesamt"]
+type = "number"
+unit = "kWh"
