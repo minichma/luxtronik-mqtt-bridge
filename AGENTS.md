@@ -10,8 +10,11 @@ update AGENTS for architecture, module responsibilities, invariants, workflow, a
 handoff information; update README for user-visible behavior, configuration,
 commands, compatibility, and limitations. Do not leave contradictory instructions.
 Update affected docs/examples when their claims change.
-Record evidence and outstanding verification in docs/validation.md, with dates;
+Maintain current evidence and outstanding verification in docs/validation.md;
 distinguish files installed, service running, and behavior actually verified.
+Documentation describes the current state only. Replace obsolete statements rather
+than appending dated updates, migration narratives, or change histories. Use Git
+history for past changes. Preserve applicable compatibility and rollback guidance.
 
 At the start of work, read this file, README.md, and relevant detailed docs;
 inspect git status and existing changes before editing. Preserve unrelated work.
@@ -169,27 +172,3 @@ and log bounds. Live verification must not change operating settings merely to t
 a path; use unchanged-value checks unless a specific change is requested.
 Do not claim FW 3.92 or a 24-hour soak from mocks or V3.89.3 tests. Keep site data,
 raw captures, and secrets outside git. Do not push without the user's instruction.
-
-## openHAB integration handoff
-
-Install site Things/Items/transforms by copying files into the openHAB configuration
-directory, not through the API. Keep original files intact; parallel new Items use
-the `_xxnew` suffix on every declared item name. Existing rules still reference the
-original names, so copied helper/derived items do not gain rule behavior automatically.
-Reuse the existing broker Thing. Read authoritative JSON for state, reject unavailable
-quality, disable optimistic updates for controlled Items, and send non-retained
-commands only for verified writable channels. Preserve legacy numeric mode values
-with explicit transformations; do not guess equivalents for missing WS fields.
-
-As of 2026-10-04, external site artifacts are under
-`%LOCALAPPDATA%\LuxtronikMqtt\openhab\heatpump-mqtt\` (including migration notes).
-They were copied to `/etc/openhab/items/heatpump-mqtt.items`,
-`/etc/openhab/things/heatpump-mqtt.things`, and
-`/etc/openhab/transform/luxmqtt-*.js`: 56 suffixed Items, two Things, 31 MQTT channels.
-openHAB 4.0.4 was running and JavaScript scripting was recorded as started; live
-item values/Thing status remain unverified. REST authentication and a full host log
-filesystem limited verification. Do not delete unrelated logs or change authentication
-to work around this. If read-only API verification is used, obtain credentials via
-an external protected file and never log them. Repository examples were not imported.
-Parallel heating shift and numeric operating status remain unlinked; flow reports
-unavailable and hot-water target is read-only. See external notes before migrating rules.

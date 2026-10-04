@@ -95,32 +95,9 @@ There are no routine reading/poll logs. Warning/error logs are rate-limited and
 rotate under `<state_root>/<device_id>/bridge.log`: 1 MiB plus two backups per pump.
 The service does not stream routine logs into the host's `/var/log` filesystem.
 
-This release replaces the old `/v1/readings/<key>` topics and monolithic config.
-Use separate per-device state directories; retire the old bridge before enabling
-new instances. See the updated [openHAB example](examples/openhab/README.md).
-
-## openHAB integration
-
-Copy Things, Items and any required transformations into the installation's
-configuration directory (`things/`, `items/`, `transform/`). Reuse the existing MQTT
-broker Thing. Subscribe to JSON state; use non-retained `/value` commands only for
-writable settings, with Item `autoupdate="false"` to await controller readback.
-
-Site-specific files are kept outside this repository. On 2026-10-04,
-`heatpump-mqtt.things`, `heatpump-mqtt.items` and `luxmqtt-*.js` were installed under
-`/etc/openhab/`, alongside the unchanged original configuration. They define two
-Things and 56 Items with the `_xxnew` suffix, including 31 MQTT channels. External
-copies and migration notes are under
-`%LOCALAPPDATA%\LuxtronikMqtt\openhab\heatpump-mqtt\`.
-
-The copied Items preserve numeric mode values through JavaScript transformations;
-three mode channels are writable. Parallel heating shift and numeric operating
-status have no verified WS equivalents and remain unlinked. Flow is currently
-unavailable; hot-water target is read-only. Existing rules continue to use original
-item names, so suffixed local/derived Items require separate rule migration.
-
-File installation is confirmed; live openHAB item values and Thing status are not
-yet verified. The generic repository examples remain separate and were not imported.
+Use separate per-device state directories and only one publisher per device ID.
+See the [openHAB example](examples/openhab/README.md) and
+[upgrade guidance](docs/deployment.md#upgrade-rollback-and-migration).
 
 ## Development and evidence
 
@@ -138,11 +115,11 @@ uv build
 
 [AGENTS.md](AGENTS.md) records module responsibilities, architectural decisions and
 maintenance rules; [validation](docs/validation.md) records remaining verification.
-Keep AGENTS.md and this
-README current with every relevant implementation, configuration or deployment
+Keep AGENTS.md and this README current with every relevant implementation, configuration or deployment
 change, and update affected detailed documentation and examples in the same change.
+Describe the current state; use Git history rather than documentation change logs.
 See [protocol evidence](docs/protocol-research.md) and [validation](docs/validation.md).
 Raw captures and actual site configuration stay outside source. The mapping builder
 accepts paired external captures; it never connects to a controller or reads secrets.
 
-The initial version of this project was developed using OpenAI Codex with GPT-6 Astra.
+Developed using OpenAI Codex with GPT-6 Astra.

@@ -2,7 +2,7 @@
 
 ## Hardware observations
 
-Read-only captures on 2026-10-01/02 and a same-value write on 2026-10-02 cover two
+Read-only captures and same-value write verification cover two
 Luxtronik 2.1 controllers reporting **V3.89.3**. German captures exist for both;
 the larger navigation was also captured after the user switched it to English.
 Raw captures remain external. Sanitized bilingual fixtures reproduce observed
