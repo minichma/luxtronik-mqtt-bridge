@@ -8,12 +8,12 @@ Runs as one systemd service per heat pump on openHABian/Linux, with Windows supp
 for local use and testing.
 
 The current implementation reads information/settings/schedules and writes fields
-that the controller declares writable. Tested protocol: **V3.89.3, German and
-English captures**. **FW 3.92.3 is currently incompatible:** its Lux_WS login
-response is JSON, while the bridge expects XML. Both upgraded live pumps report
-MQTT `offline`; retained readings are stale. JSON protocol support is required.
-SHI responds on both pumps but is not integrated into this bridge. No legacy API
-fallback is used.
+that the controller declares writable. Lux_WS XML and JSON responses are supported,
+including JSON navigation, content, REFRESH and write metadata. Fixtures cover
+V3.89.3 German/English captures, and deployed one-shot/live service checks pass
+against FW 3.92.3 controllers. SHI responds on both pumps but is not integrated
+into this bridge. No legacy
+API fallback is used.
 
 ## Configuration
 

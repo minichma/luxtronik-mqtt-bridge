@@ -30,7 +30,7 @@ contain site configuration; never copy secrets or raw captures into documentatio
 | --- | --- |
 | `src/luxtronik_mqtt/cli.py`, `__main__.py` | CLI configuration, check/discover/once/run entry points |
 | `config.py` | Layered configuration validation and external secret loading |
-| `protocol.py` | Bounded XML parsing, navigation, snapshots, refresh merging, write metadata |
+| `protocol.py` | Bounded XML/JSON parsing, navigation, snapshots, refresh merging, write metadata |
 | `controller.py` | Lux_WS sessions, page selection, sampling, serialized controller writes/readback |
 | `model.py` | Value normalization, constraints, command encoding, scalar representation |
 | `publisher.py` | MQTT connection/subscription options, retained state, change detection, topic manifest |
@@ -56,10 +56,11 @@ uv.lock and deployment requirements.lock consistent.
 ## Controller protocol
 
 Use Luxtronik 2.1 Lux_WS on configurable port 8214. Never probe or fall back to
-legacy ports 8888/8889. XML navigation/content is verified with V3.89.3 captures.
-Both live controllers run V3.92.3: LOGIN returns JSON (type/items/id), which the
-current XML-only parser rejects. Both bridges report offline. Implement and test
-JSON navigation/content/refresh/write handling before claiming V3.92.3 support.
+legacy ports 8888/8889. The parser accepts bounded XML and JSON navigation,
+content, REFRESH and write metadata. XML behavior is verified with V3.89.3
+captures; deployed live checks pass against the current V3.92.3 controllers. SHI
+firmware reads work on port 502, but SHI is not implemented by this bridge. Reject
+unknown formats instead of guessing encodings.
 SHI firmware reads work on port 502, but SHI is not implemented by this bridge.
 Reject unknown formats instead of guessing encodings.
 

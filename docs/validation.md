@@ -10,13 +10,13 @@
 - Full-suite MQTT integration verification is incomplete: disposable broker startup
   stalls. Tests cover command/replay handling, reconnects, broker outages and Last
   Will, but their presence does not establish a passing result for the current code.
-- The bundled-mapping build is not yet deployed to the live bridge services.
+- The bundled-mapping build with JSON support is deployed to both live bridge services.
 
 ## Live installation
 
 - Both controllers report firmware 3.92.3 through read-only SHI input registers
   10400–10402 (TCP 502, unit 1). Their Lux_WS LOGIN responses are JSON objects
-  with type/items/id fields; the current XML parser rejects them.
+  with type/items/id fields; the parser now accepts this format as well as XML.
 - Both bridge services are active/running with zero systemd restarts, but report
   repeated ProtocolError and retained MQTT availability offline. Retained firmware
   readings still contain V3.89.3 and are stale, not evidence of successful polling.
@@ -39,8 +39,8 @@
 
 ## Outstanding verification
 
-- Implement and verify FW 3.92.3 JSON protocol support, then restore live MQTT
-  publishing and recheck openHAB values. Real-hardware login failure behavior.
+- Recheck retained MQTT and openHAB values through authenticated clients, and verify
+  real-hardware login failure behavior.
 - A 24-hour soak including outages.
 - Full broker integration suite for the current build and deployment of bundled mappings.
 - Authenticated openHAB Thing/link checks and equivalence of remaining legacy readings.

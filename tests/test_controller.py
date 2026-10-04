@@ -20,7 +20,7 @@ from .fake_controller import FakeController
 @pytest.mark.parametrize(
     "frame",
     [
-        '{"type":"Navigation"}',
+        '{"type":',
         "<broken>",
         '<!DOCTYPE x [<!ENTITY secret SYSTEM "file:///etc/passwd">]><x>&secret;</x>',
         "<x>" * 35 + "</x>" * 35,
@@ -37,6 +37,29 @@ def test_first_duplicate_wins(fixture_dir):
     assert reading.values == ("Aus",)
     updated = refresh(decode((fixture_dir / "refresh0.xml").read_bytes()), snapshot)
     assert updated.values[reading.path].values == ("Aus",)
+
+
+def test_json_navigation_content_and_refresh():
+    nav = decode(
+        '{"type":"Navigation","items":[{"id":"0x1","name":"Informationen",'
+        '"items":[{"id":"0x2","name":"Temperaturen","items":[]}]}]}'
+    )
+    paths = navigation(nav)
+    assert paths[("Informationen", "Temperaturen")] == "0x2"
+    page = decode(
+        '{"type":"Content","name":"Temperaturen","items":['
+        '{"id":"0x10","name":"Vorlauf","value":"35.0°C",'
+        '"type":"slider","min":0,"max":100,"step":1,"div":10,"raw":350},'
+        '{"id":"0x11","name":"Modus","value":"Auto", "type":"combo",'
+        '"options":{"0":"Aus","1":"Auto"}}]}'
+    )
+    snapshot = content(page, ("Informationen", "Temperaturen"))
+    assert snapshot.values[("Informationen", "Temperaturen", "Vorlauf")].write is not None
+    changed = refresh(
+        decode('{"type":"values","items":[{"id":"0x10","value":"36.0°C"}]}'),
+        snapshot,
+    )
+    assert changed.values[("Informationen", "Temperaturen", "Vorlauf")].values == ("36.0°C",)
 
 
 def test_omitted_refresh_preserves_original_observation(fixture_dir):
