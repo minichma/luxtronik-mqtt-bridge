@@ -9,7 +9,11 @@ for local use and testing.
 
 The current implementation reads information/settings/schedules and writes fields
 that the controller declares writable. Tested protocol: **V3.89.3, German and
-English captures**. FW 3.92 remains unverified; no legacy API fallback is used.
+English captures**. **FW 3.92.3 is currently incompatible:** its Lux_WS login
+response is JSON, while the bridge expects XML. Both upgraded live pumps report
+MQTT `offline`; retained readings are stale. JSON protocol support is required.
+SHI responds on both pumps but is not integrated into this bridge. No legacy API
+fallback is used.
 
 ## Configuration
 

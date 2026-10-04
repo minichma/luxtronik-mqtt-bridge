@@ -56,8 +56,12 @@ uv.lock and deployment requirements.lock consistent.
 ## Controller protocol
 
 Use Luxtronik 2.1 Lux_WS on configurable port 8214. Never probe or fall back to
-legacy ports 8888/8889. XML navigation/content is verified on two V3.89.3 units;
-FW 3.92 remains unverified. Reject unknown formats instead of guessing encodings.
+legacy ports 8888/8889. XML navigation/content is verified with V3.89.3 captures.
+Both live controllers run V3.92.3: LOGIN returns JSON (type/items/id), which the
+current XML-only parser rejects. Both bridges report offline. Implement and test
+JSON navigation/content/refresh/write handling before claiming V3.92.3 support.
+SHI firmware reads work on port 502, but SHI is not implemented by this bridge.
+Reject unknown formats instead of guessing encodings.
 
 Use LOGIN and discovered navigation IDs. Keep one information connection and, if
 needed, one settings/schedules connection per heat pump. GET selects a page and
