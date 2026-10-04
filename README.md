@@ -144,3 +144,5 @@ change, and update affected detailed documentation and examples in the same chan
 See [protocol evidence](docs/protocol-research.md) and [validation](docs/validation.md).
 Raw captures and actual site configuration stay outside source. The mapping builder
 accepts paired external captures; it never connects to a controller or reads secrets.
+
+The initial version of this project was developed using OpenAI Codex with GPT-6 Astra.
