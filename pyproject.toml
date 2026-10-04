@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "luxtronik-mqtt-bridge"
-version = "0.1.0"
-description = "Read-only Lux_WS to MQTT bridge for openHABian and Windows"
+version = "0.2.0"
+description = "Lux_WS to MQTT bridge"
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
@@ -18,7 +18,7 @@ dependencies = [
 luxtronik-mqtt = "luxtronik_mqtt.cli:main"
 
 [dependency-groups]
-dev = ["pytest>=8,<10", "pytest-asyncio>=1.4,<2", "ruff>=0.11,<1", "amqtt>=0.11.3,<0.12"]
+dev = ["pytest>=8,<10", "pytest-asyncio>=1.4,<2", "ruff>=0.11,<1"]
 
 [tool.uv.dependency-groups]
 dev = {requires-python = ">=3.11"}

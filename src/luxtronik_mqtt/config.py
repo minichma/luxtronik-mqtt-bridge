@@ -25,6 +25,10 @@ class Sensor:
     path: tuple[str, ...]
     type: str
     unit: str | None = None
+    page: tuple[str, ...] = ()
+    options: dict[str, str] = field(default_factory=dict)
+    translations: dict[str, str] = field(default_factory=dict)
+    position: int | None = None
 
 
 @dataclass(frozen=True)
@@ -48,6 +52,9 @@ class Settings:
     ca_file: str | None
     state_dir: Path
     sensors: tuple[Sensor, ...]
+    language: str = "de"
+    schedules_interval: float = 300
+    writes: bool = True
 
 
 @dataclass(frozen=True)
@@ -116,32 +123,51 @@ def _boolean(table: dict, key: str, default: bool) -> bool:
     return value
 
 
-def load_config(path: Path) -> Settings:
+def _read(path: Path) -> dict:
     try:
         with path.open("rb") as stream:
-            raw = tomllib.load(stream)
+            return tomllib.load(stream)
     except (OSError, ValueError):
         raise ConfigError("Cannot read configuration or invalid TOML") from None
-    _fields(raw, "device luxtronik mqtt runtime sensors")
-    device, lux, mqtt, runtime = (
-        raw.get(t, {}) for t in ("device", "luxtronik", "mqtt", "runtime")
-    )
-    _fields(device, "id")
+
+
+def load_config(path: Path) -> Settings:
+    path = path.resolve()
+    individual = _read(path)
+    _fields(individual, "base device luxtronik runtime")
+    base_path = (path.parent / _text(individual, "base")).resolve()
+    raw = _read(base_path)
+    _fields(raw, "mappings_dir luxtronik mqtt runtime")
+    device = individual.get("device", {})
+    _fields(device, "id url language")
+    device_id = _text(device, "id")
+    if not KEY.fullmatch(device_id):
+        raise ConfigError("Invalid device ID")
+    language = _text(device, "language", "de")
+    if language not in ("de", "en"):
+        raise ConfigError("Supported languages: de, en")
+    mapping_path = base_path.parent / _text(raw, "mappings_dir", "mappings") / (language + ".toml")
+    mapping = _read(mapping_path)
+    _fields(mapping, "language information_label readings")
+    if mapping.get("language") != language:
+        raise ConfigError("Mapping language mismatch")
+    lux = dict(raw.get("luxtronik", {}))
+    lux.update(individual.get("luxtronik", {}))
+    mqtt = raw.get("mqtt", {})
+    runtime = dict(raw.get("runtime", {}))
+    runtime.update(individual.get("runtime", {}))
     _fields(
         lux,
-        "url subprotocol password_file_env information_label poll_interval_seconds "
-        "operation_timeout_seconds stale_after_seconds max_frame_bytes",
+        "password_file_env poll_interval_seconds operation_timeout_seconds "
+        "stale_after_seconds max_frame_bytes schedules_interval_seconds writes",
     )
     _fields(
         mqtt,
         "host port tls verify_certificate authentication username_file_env "
-        "password_file_env client_id topic_prefix qos retain ca_file",
+        "password_file_env topic_root ca_file",
     )
     _fields(runtime, "state_dir")
-    device_id = _text(device, "id")
-    if not KEY.fullmatch(device_id):
-        raise ConfigError("device.id must contain lowercase letters, digits, or underscores")
-    url = _text(lux, "url")
+    url = _text(device, "url")
     try:
         parsed = urlsplit(url)
         valid = (
@@ -157,60 +183,76 @@ def load_config(path: Path) -> Settings:
         valid = False
     if not valid:
         raise ConfigError("Invalid Lux_WS URL; credentials and legacy ports are forbidden")
-    if _text(lux, "subprotocol", "Lux_WS") != "Lux_WS":
-        raise ConfigError("Only Lux_WS is supported")
     poll = _number(lux, "poll_interval_seconds", 30, 1, 3600)
     timeout = _number(lux, "operation_timeout_seconds", 10, 0.1, 120)
     stale = _number(lux, "stale_after_seconds", 120, 1, 7200)
     if stale <= poll + timeout:
         raise ConfigError("stale_after_seconds must exceed polling interval plus timeout")
     max_frame = _number(lux, "max_frame_bytes", 1048576, 1024, 4194304)
-    port = _number(mqtt, "port", 8883, 1, 65535)
+    port = _number(mqtt, "port", 1883, 1, 65535)
     if type(port) is not int or type(max_frame) is not int:
         raise ConfigError("Ports and frame limits must be integers")
-    tls = _boolean(mqtt, "tls", True)
+    tls = _boolean(mqtt, "tls", False)
     if not _boolean(mqtt, "verify_certificate", True):
         raise ConfigError("TLS certificate verification cannot be disabled")
-    auth = _text(mqtt, "authentication", "password")
+    auth = _text(mqtt, "authentication", "none")
     if auth not in ("password", "none"):
         raise ConfigError("MQTT authentication must be password or none")
     host = _text(mqtt, "host")
     if any(c in host for c in "/@?# "):
         raise ConfigError("mqtt.host must be a hostname or IP address")
-    prefix = _text(mqtt, "topic_prefix", f"luxtronik/{device_id}/v1")
-    if not re.fullmatch(r"[a-zA-Z0-9_-]+(?:/[a-zA-Z0-9_-]+)*", prefix):
-        raise ConfigError("Invalid MQTT topic prefix")
-    if mqtt.get("qos", 1) != 1 or not _boolean(mqtt, "retain", True):
-        raise ConfigError("The v1 contract requires QoS 1 and retained messages")
-    state_dir = Path(_text(runtime, "state_dir"))
-    if not state_dir.is_absolute():
+    topic_root = _text(mqtt, "topic_root", "luxtronik")
+    if not re.fullmatch(r"[a-z0-9_]+(?:/[a-z0-9_]+)*", topic_root):
+        raise ConfigError("Invalid MQTT topic root")
+    state_root = Path(_text(runtime, "state_dir"))
+    if not state_root.is_absolute():
         raise ConfigError("runtime.state_dir must be an absolute external path")
-    specs = raw.get("sensors", [])
-    if not isinstance(specs, list) or len(specs) > 512:
-        raise ConfigError("Invalid sensor list")
+    specs = mapping.get("readings", [])
+    if not isinstance(specs, list) or not 1 <= len(specs) <= 2048:
+        raise ConfigError("Invalid mapping list")
     sensors = []
     for item in specs:
-        _fields(item, "key path type unit")
-        key, kind = _text(item, "key"), _text(item, "type")
-        sensor_path = item.get("path")
+        _fields(item, "topic path page type unit options translations position")
+        key, kind = _text(item, "topic"), _text(item, "type")
+        sensor_path, page = item.get("path"), item.get("page")
         if (
-            not KEY.fullmatch(key)
-            or kind not in ("number", "boolean", "text", "duration")
-            or not isinstance(sensor_path, list)
-            or not 1 <= len(sensor_path) <= 16
-            or any(not isinstance(p, str) or not p.strip() for p in sensor_path)
+            not re.fullmatch(r"[a-z][a-z0-9]*(?:/[a-z0-9]+)+", key)
+            or kind not in ("number", "boolean", "text", "duration", "enum", "timer")
+            or any(
+                not isinstance(p, list)
+                or not 1 <= len(p) <= 16
+                or any(not isinstance(v, str) or not v.strip() for v in p)
+                for p in (sensor_path, page)
+            )
+            or sensor_path[: len(page)] != page
         ):
-            raise ConfigError("Invalid sensor key, type, or path")
+            raise ConfigError("Invalid mapping topic, type, page, or path")
+        position = item.get("position")
+        if position is not None and (type(position) is not int or not 1 <= position <= 100):
+            raise ConfigError("Invalid mapping position")
+        if ("*" in sensor_path) != (position is not None) or (position and sensor_path[-1] != "*"):
+            raise ConfigError("Only positional leaf wildcards are supported")
         unit = item.get("unit")
         if unit is not None and (not isinstance(unit, str) or not unit):
             raise ConfigError("Invalid sensor unit")
         if kind == "duration" and unit != "s":
-            raise ConfigError("Duration sensors must use seconds (unit = s)")
-        sensors.append(Sensor(key, tuple(sensor_path), kind, unit))
+            raise ConfigError("Duration sensors must use seconds")
+        options, translations = item.get("options", {}), item.get("translations", {})
+        for entries in (options, translations):
+            if not isinstance(entries, dict) or any(
+                not isinstance(k, str) or not isinstance(v, str) or not v
+                for k, v in entries.items()
+            ):
+                raise ConfigError("Invalid value translation")
+        sensors.append(
+            Sensor(
+                key, tuple(sensor_path), kind, unit, tuple(page), options, translations, position
+            )
+        )
     if len({s.key for s in sensors}) != len(sensors):
-        raise ConfigError("Duplicate sensor keys")
-    if len({s.path for s in sensors}) != len(sensors):
-        raise ConfigError("Duplicate sensor paths")
+        raise ConfigError("Duplicate mapping topics")
+    if len({(s.path, s.position) for s in sensors}) != len(sensors):
+        raise ConfigError("Duplicate mapping paths")
     ca_file = mqtt.get("ca_file")
     if ca_file is not None and (not isinstance(ca_file, str) or not Path(ca_file).is_absolute()):
         raise ConfigError("ca_file must be an absolute path")
@@ -218,7 +260,7 @@ def load_config(path: Path) -> Settings:
         device_id,
         url,
         _text(lux, "password_file_env", "LUXTRONIK_PASSWORD_FILE"),
-        _text(lux, "information_label", "Informationen"),
+        _text(mapping, "information_label"),
         poll,
         timeout,
         stale,
@@ -229,9 +271,12 @@ def load_config(path: Path) -> Settings:
         auth,
         _text(mqtt, "username_file_env", "MQTT_USERNAME_FILE"),
         _text(mqtt, "password_file_env", "MQTT_PASSWORD_FILE"),
-        _text(mqtt, "client_id"),
-        prefix,
+        "luxtronik-" + device_id,
+        topic_root + "/" + device_id,
         ca_file,
-        state_dir,
+        state_root / device_id,
         tuple(sensors),
+        language,
+        _number(lux, "schedules_interval_seconds", 300, 30, 86400),
+        _boolean(lux, "writes", True),
     )

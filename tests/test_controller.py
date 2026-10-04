@@ -2,25 +2,19 @@ import logging
 from dataclasses import replace
 
 import pytest
-from websockets.asyncio.server import serve
 
-from luxtronik_mqtt.config import Sensor
 from luxtronik_mqtt.controller import Controller
 from luxtronik_mqtt.model import normalize
 from luxtronik_mqtt.protocol import (
     AuthenticationError,
     ProtocolError,
+    content,
     decode,
-    information_id,
-    readings,
+    navigation,
+    refresh,
 )
 
-
-def test_real_xml_shape(fixture_dir):
-    nav = decode((fixture_dir / "navigation.xml").read_bytes())
-    assert information_id(nav, "Informationen") == "0x100"
-    raw = readings(decode((fixture_dir / "information.xml").read_bytes()), "Informationen")
-    assert raw[("Temperaturen", "Außentemperatur")].values == ("17.0°C",)
+from .fake_controller import FakeController
 
 
 @pytest.mark.parametrize(
@@ -37,63 +31,102 @@ def test_rejects_unsafe_or_unknown_frames(frame):
         decode(frame)
 
 
-def test_partial_refresh_and_ambiguous_paths_rejected(fixture_dir):
+def test_first_duplicate_wins(fixture_dir):
+    snapshot = content(decode((fixture_dir / "page0.xml").read_bytes()), ("Informationen",))
+    reading = snapshot.values[("Informationen", "Eingänge", "HD")]
+    assert reading.values == ("Aus",)
+    updated = refresh(decode((fixture_dir / "refresh0.xml").read_bytes()), snapshot)
+    assert updated.values[reading.path].values == ("Aus",)
+
+
+def test_omitted_refresh_preserves_original_observation(fixture_dir):
+    snapshot = content(decode((fixture_dir / "page0.xml").read_bytes()), ("Informationen",))
+    updated = refresh(decode("<values/>"), snapshot)
+    assert updated.values == snapshot.values
+    assert all(updated.values[p].observed_at == r.observed_at for p, r in snapshot.values.items())
+
+
+@pytest.mark.parametrize(
+    "frame",
+    ["<Content/>", '<values><item id="0x999999"/></values>', '<values><item id="bad"/></values>'],
+)
+def test_unknown_refresh_fails(fixture_dir, frame):
+    snapshot = content(decode((fixture_dir / "page0.xml").read_bytes()), ("Informationen",))
     with pytest.raises(ProtocolError):
-        readings(decode((fixture_dir / "refresh.xml").read_bytes()), "Informationen")
-    raw = readings(
-        decode(
-            "<Content><name>Informationen</name>"
-            "<item><name>x</name><value>1</value></item>"
-            "<item><name>x</name><value>2</value></item></Content>"
-        ),
-        "Informationen",
-    )
-    assert raw[("x",)].ambiguous
-    with pytest.raises(ProtocolError):
-        normalize(Sensor("x", ("x",), "number"), raw[("x",)], "now")
+        refresh(decode(frame), snapshot)
+
+
+def test_authentication_and_size_limits():
+    with pytest.raises(AuthenticationError):
+        navigation(decode("<Error/>"))
     with pytest.raises(ProtocolError):
         decode("<x/>", max_bytes=1)
 
 
-async def test_reconnect_rediscovers_ids_read_only_and_redacts(config, fixture_dir, caplog):
-    commands = []
-    connection_count = 0
-    server_log = logging.Logger("test-server-silent")
-    server_log.disabled = True
-
-    async def handler(ws):
-        nonlocal connection_count
-        connection_count += 1
-        identifier = f"0x{connection_count + 100:x}"
-        login = await ws.recv()
-        assert login == "LOGIN;TEST_SECRET"
-        await ws.send(
-            f'<Navigation><item id="{identifier}"><name>Informationen</name></item></Navigation>'
-        )
-        async for message in ws:
-            commands.append(message)
-            assert message == "GET;" + identifier
-            await ws.send((fixture_dir / "information.xml").read_text("utf-8"))
-
-    async with serve(handler, "127.0.0.1", 0, subprotocols=["Lux_WS"], logger=server_log) as server:
-        port = server.sockets[0].getsockname()[1]
-        local = replace(config, url=f"ws://127.0.0.1:{port}")
+async def test_session_scoped_ids_refresh_and_redaction(config, fixture_dir, caplog):
+    async with FakeController(fixture_dir) as fake:
+        c = replace(config, url=f"ws://127.0.0.1:{fake.port}")
         with caplog.at_level(logging.DEBUG):
             for _ in range(2):
-                async with Controller(local, "TEST_SECRET") as controller:
-                    assert await controller.sample()
-                    assert await controller.sample()
-    assert commands == ["GET;0x65", "GET;0x65", "GET;0x66", "GET;0x66"]
-    assert "TEST_SECRET" not in caplog.text
+                async with Controller(c, "TEST_SECRET") as controller:
+                    first = await controller.sample()
+                    second = await controller.sample()
+                    assert first.keys() == second.keys()
+        assert fake.connections == 4
+        for connection in range(1, 5):
+            commands = [m for n, m in fake.commands if n == connection]
+            assert commands[0].startswith("GET;")
+            assert commands[-1] == "REFRESH"
+        assert "TEST_SECRET" not in caplog.text
 
 
-async def test_rejected_login(config):
-    async def handler(ws):
-        await ws.recv()
-        await ws.send("<Error>synthetic rejection</Error>")
+async def test_validated_write_and_readback(config, fixture_dir):
+    async with FakeController(fixture_dir) as fake:
+        c = replace(config, url=f"ws://127.0.0.1:{fake.port}")
+        spec = next(s for s in c.sensors if s.key.endswith("loweringto"))
+        async with Controller(c, "test") as controller:
+            raw = await controller.sample()
+            assert normalize(spec, raw[spec.key])["value"] == -20
+            assert await controller.write(spec, b"-19.5") == "applied"
+            assert normalize(spec, controller.values()[spec.key])["value"] == -19.5
+            assert fake.saved == 1
+            assert await controller.write(spec, b"-19.5") == "unchanged"
+            assert fake.saved == 1
+            before = len(fake.commands)
+            from luxtronik_mqtt.protocol import CommandError
 
-    async with serve(handler, "127.0.0.1", 0, subprotocols=["Lux_WS"]) as server:
-        local = replace(config, url=f"ws://127.0.0.1:{server.sockets[0].getsockname()[1]}")
-        with pytest.raises(AuthenticationError):
-            async with Controller(local, "test-only"):
-                pytest.fail("Login rejection must not create a session")
+            with pytest.raises(CommandError):
+                await controller.write(spec, b"1000")
+            assert all(not command.startswith("SET;") for _, command in fake.commands[before:])
+
+
+async def test_timer_write_and_scoped_reused_ids(full_config, fixture_dir):
+    timer = next(s for s in full_config.sensors if s.type == "timer")
+    async with FakeController(fixture_dir) as fake:
+        c = replace(full_config, url=f"ws://127.0.0.1:{fake.port}", sensors=(timer,))
+        async with Controller(c, "test") as controller:
+            await controller.sample()
+            assert await controller.write(timer, b"23:00 - 02:00") == "applied"
+            assert normalize(timer, controller.values()[timer.key])["value"] == "23:00 - 02:00"
+
+
+@pytest.mark.parametrize("language", ["de", "en"])
+async def test_all_pages_in_both_languages(config_files, fixture_dir, language):
+    from luxtronik_mqtt.config import load_config
+
+    path = config_files / "device.toml"
+    path.write_text(
+        path.read_text("utf-8").replace('language = "de"', f'language = "{language}"'),
+        encoding="utf-8",
+    )
+    c = load_config(path)
+    async with FakeController(fixture_dir.parent / language) as fake:
+        c = replace(c, url=f"ws://127.0.0.1:{fake.port}")
+        async with Controller(c, "test") as controller:
+            raw = await controller.sample()
+            assert len(raw) == 271
+            assert all(normalize(s, raw[s.key])["quality"] != "invalid" for s in c.sensors)
+            flow = next(s for s in c.sensors if s.key == "information/temperatures/flow")
+            assert normalize(flow, raw[flow.key])["value"] == 10
+            assert len(await controller.sample()) == 271
+            assert fake.connections == 2

@@ -1,20 +1,13 @@
-// Gate automations on Luxtronik_OutdoorFresh, not on a retained numeric value alone.
-rule "Luxtronik outside reading freshness"
+// Retained timestamps describe observations, not periodic heartbeats.
+rule "Luxtronik outside reading usability"
 when
     Item Luxtronik_Outdoor received update or
     Item Luxtronik_OutdoorQuality received update or
-    Item Luxtronik_OutdoorObserved received update or
     Item Luxtronik_Availability received update or
-    Time cron "0/15 * * * * ?" or
     System started
 then
-    var usable = false
-    if (Luxtronik_Availability.state.toString == "online" &&
+    val usable = Luxtronik_Availability.state.toString == "online" &&
         Luxtronik_OutdoorQuality.state.toString == "good" &&
-        Luxtronik_Outdoor.state != NULL && Luxtronik_Outdoor.state != UNDEF &&
-        Luxtronik_OutdoorObserved.state instanceof DateTimeType) {
-        val observed = (Luxtronik_OutdoorObserved.state as DateTimeType).getZonedDateTime()
-        usable = observed.isAfter(now.minusSeconds(120)) && !observed.isAfter(now.plusSeconds(5))
-    }
+        Luxtronik_Outdoor.state != NULL && Luxtronik_Outdoor.state != UNDEF
     Luxtronik_OutdoorFresh.postUpdate(if (usable) ON else OFF)
 end

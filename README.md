@@ -1,79 +1,143 @@
 # Luxtronik MQTT bridge
 
-A new, standalone project to expose readings from a Luxtronik 2.1 controller
-through MQTT. It is particularly intended to work with FW 3.92+ where the
-legacy TCP API on port 8889 has been removed.
+A standalone Luxtronik 2.1 bridge that exposes readings and supported settings
+through MQTT using Lux_WS. It targets installations where the legacy TCP API on
+port 8889 is unavailable, including the intended FW 3.92 deployment.
 
-Deploy as a systemd service on openHABian; run the same application in a Windows
-console for testing.
+Runs as one systemd service per heat pump on openHABian/Linux, with Windows support
+for local use and testing.
 
-Implemented and live-tested on **Luxtronik 2.1 V3.89.3 (German UI)**.
-**FW 3.92 remains the target, not a verified compatibility claim.** The bridge
-supports the observed XML protocol; unexpected formats fail explicitly.
-Repository: [minichma/luxtronik-mqtt-bridge](https://github.com/minichma/luxtronik-mqtt-bridge).
+The current implementation reads information/settings/schedules and writes fields
+that the controller declares writable. Tested protocol: **V3.89.3, German and
+English captures**. FW 3.92 remains unverified; no legacy API fallback is used.
 
-The controller's legacy TCP API on port 8889 is unavailable, per the project
-requirement. Use the WebSocket subprotocol `Lux_WS`; there will be no legacy
-fallback. The verified endpoint is `ws://<controller>:8214/` on the test controller.
+## Configuration
 
-## Run
-
-Python 3.9+. Copy [example configuration](config/bridge.example.toml) outside the
-checkout. Set endpoints, secret-file environment variables, and an absolute state
-directory. Initial mappings cover outdoor/flow/return temperatures, compressor
-hours/starts/running status, and total heat/input energy on the test controller.
-
-```sh
-uv sync --locked --no-dev
-uv run --locked --no-dev luxtronik-mqtt --config /absolute/path/bridge.toml check
-uv run --locked --no-dev luxtronik-mqtt --config /absolute/path/bridge.toml discover
-uv run --locked --no-dev luxtronik-mqtt --config /absolute/path/bridge.toml once
-uv run --locked --no-dev luxtronik-mqtt --config /absolute/path/bridge.toml run
-```
-
-`check` makes no connections. `discover` lists paths without values. `once`
-publishes one sample and exits offline. `run` polls every 30 seconds until stopped.
-See [deployment](docs/deployment.md) for Windows helpers and the openHABian service.
-
-MQTT topics: `luxtronik/<device_id>/v1/readings/<sensor_key>`, `/availability`, and
-`/metadata`. Readings contain `value`, `unit`, `observed_at`, and `quality`, with
-QoS 1 and retention. Consumers must check freshness as well as availability.
-An [openHAB example](examples/openhab/README.md) includes this check.
-
-## Project documents
-
-- [AGENTS.md](AGENTS.md): architectural decisions and contributor rules.
-- [PLAN.md](PLAN.md): milestones, acceptance criteria, and outstanding inputs.
-- [Protocol research](docs/protocol-research.md): evidence and uncertainties.
-- [Secrets](docs/secrets.md): credential storage and deployment policy.
-- [Example configuration](config/bridge.example.toml): validated configuration
-  contract, with reserved example addresses and no credentials.
-
-## Data flow
+Copy the [configuration examples](config/base.example.toml) and mappings outside
+source, using this layout:
 
 ```text
-Luxtronik 2.1
-    -> Lux_WS login + information GET -> mapped values -> normalization
-    -> MQTT broker -> openHAB / other subscribers
+config/
+  base.toml                 # shared MQTT, timing, state root
+  mappings/de.toml          # German controller paths
+  mappings/en.toml          # English controller paths, identical topic IDs
+  devices/heatpump1.toml
+  devices/heatpump2.toml
 ```
 
-Initial scope: temperatures, operating status, runtime counters, and energy
-readings where the controller exposes them. Missing sensors remain missing;
-the bridge must not invent values. Controller writes, MQTT command topics,
-cloud services, and automatic home-automation discovery are outside v1.
+Each device file references `../base.toml`. MQTT prefixes, client IDs, and state
+subdirectories derive from the device ID, so MQTT settings are shared. The catalogs
+contain **271 mappings** from the captured hardware; each pump publishes only its
+available fields. English abbreviations are expanded in topic IDs, and numbered
+circuits use numeric subtopics. Actual credentials live in protected external files;
+see [secrets](docs/secrets.md).
 
-## Development
+```sh
+uv sync --locked
+uv run --locked luxtronik-mqtt --config /absolute/config/devices/heatpump_old.toml check
+uv run --locked luxtronik-mqtt --config /absolute/config/devices/heatpump_old.toml discover
+uv run --locked luxtronik-mqtt --config /absolute/config/devices/heatpump_old.toml run
+```
 
-Python 3.11+ is required for test tools (runtime supports 3.9+).
+`check` makes no connections. `discover` lists mapped paths without their values.
+`once` publishes an initial snapshot then exits offline. Do not run two publishers
+with the same device ID. See [deployment](docs/deployment.md) for Windows and systemd.
+
+## MQTT topics and writes
+
+MQTT 5 is required. Example topics:
+
+```text
+luxtronik/heatpump1/information/temperatures/flow
+luxtronik/heatpump1/information/temperatures/flow/value
+luxtronik/heatpump1/information/temperatures/mixingcircuit/1/flow
+luxtronik/heatpump1/settings/temperatures/loweringto/value
+luxtronik/heatpump1/settings/temperatures/loweringto/result
+luxtronik/heatpump1/availability
+luxtronik/heatpump1/metadata
+```
+
+The reading topic carries retained JSON; `/value` carries the scalar. Example:
+
+```json
+{"value":35.5,"unit":"degC","observed_at":"2026-10-03T08:00:00Z","quality":"good","path":["Informationen","Temperaturen","Vorlauf"],"writable":false,"possible_values":null}
+```
+
+Writable JSON exposes `possible_values.choices`, numeric `minimum`/`maximum`/`step`,
+or a timer format. To write, publish a **non-retained scalar** to that reading's
+`/value` topic. Use the exact English choice listed in JSON, a number in the displayed
+unit, or `HH:MM - HH:MM` for timers. `/result` reports `applied`, `unchanged`, or a
+rejection/failure status. Readback, not the command payload, determines published
+state. Fields without write metadata reject commands. `writes = false` disables writes.
+
+The bridge rejects retained commands and ignores its own state publications using
+MQTT 5 subscription options. An uncertain write is never automatically retried.
+Keep broker access limited to clients trusted to control the heat pumps.
+
+Values publish initially and only when value, quality, path, or constraints change.
+No timestamp-only repeats occur. `observed_at` in retained JSON can therefore be old
+for an unchanged value. Use `availability = online` and `quality = good` to decide
+whether state is usable; do not expire a reading just because it has not changed.
+QoS 1 allows transport duplicates. Readings missing on a model have no topic; a
+reported unavailable value is null. Duplicate paths within a page use the first entry.
+
+## Operation
+
+Information/settings refresh every 30 seconds. A second connection navigates
+settings and scans schedules every 300 seconds, also reloading histories and write
+constraints. Page switches require GET, while
+repeated reads of the selected page use REFRESH. Controller IDs are never MQTT IDs.
+Availability goes offline on a lost/stale controller or broker connection.
+
+There are no routine reading/poll logs. Warning/error logs are rate-limited and
+rotate under `<state_root>/<device_id>/bridge.log`: 1 MiB plus two backups per pump.
+The service does not stream routine logs into the host's `/var/log` filesystem.
+
+This release replaces the old `/v1/readings/<key>` topics and monolithic config.
+Use separate per-device state directories; retire the old bridge before enabling
+new instances. See the updated [openHAB example](examples/openhab/README.md).
+
+## openHAB integration
+
+Copy Things, Items and any required transformations into the installation's
+configuration directory (`things/`, `items/`, `transform/`). Reuse the existing MQTT
+broker Thing. Subscribe to JSON state; use non-retained `/value` commands only for
+writable settings, with Item `autoupdate="false"` to await controller readback.
+
+Site-specific files are kept outside this repository. On 2026-10-04,
+`heatpump-mqtt.things`, `heatpump-mqtt.items` and `luxmqtt-*.js` were installed under
+`/etc/openhab/`, alongside the unchanged original configuration. They define two
+Things and 56 Items with the `_xxnew` suffix, including 31 MQTT channels. External
+copies and migration notes are under
+`%LOCALAPPDATA%\LuxtronikMqtt\openhab\heatpump-mqtt\`.
+
+The copied Items preserve numeric mode values through JavaScript transformations;
+three mode channels are writable. Parallel heating shift and numeric operating
+status have no verified WS equivalents and remain unlinked. Flow is currently
+unavailable; hot-water target is read-only. Existing rules continue to use original
+item names, so suffixed local/derived Items require separate rule migration.
+
+File installation is confirmed; live openHAB item values and Thing status are not
+yet verified. The generic repository examples remain separate and were not imported.
+
+## Development and evidence
+
+Python 3.9+ runs the service; Python 3.11+ runs development tools. Tests use real
+Mosquitto 2: install its executable on PATH, or provide Docker for a disposable
+broker. They never use the live installation's broker or write controller settings.
 
 ```sh
 uv sync --locked
 uv run --locked pytest -q
 uv run --locked ruff check src tests tools
+uv run --locked ruff format --check src tests tools
 uv build
 ```
 
-Tests use sanitized XML and a disposable local MQTT broker. Live tests are explicit:
-`tools/smoke_test.py --config PATH` publishes real readings and verifies delivery.
-Keep secrets, raw captures, and actual site configuration outside source control.
-`uv.lock` pins dependencies; `requirements.lock` is the hashed production export.
+[AGENTS.md](AGENTS.md) records module responsibilities, architectural decisions and
+maintenance rules; [PLAN.md](PLAN.md) records remaining work. Keep AGENTS.md and this
+README current with every relevant implementation, configuration or deployment
+change, and update affected detailed documentation and examples in the same change.
+See [protocol evidence](docs/protocol-research.md) and [validation](docs/validation.md).
+Raw captures and actual site configuration stay outside source. The mapping builder
+accepts paired external captures; it never connects to a controller or reads secrets.

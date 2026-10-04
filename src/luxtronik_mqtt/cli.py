@@ -12,6 +12,7 @@ from pathlib import Path
 from .compat import run_async
 from .config import ConfigError, load_config, load_secrets
 from .controller import Controller
+from .logging_config import configure
 from .service import run
 
 
@@ -24,12 +25,17 @@ async def execute(args, config, secrets):
         if args.command == "discover":
             async with Controller(config, secrets.controller) as controller:
                 raw = await controller.sample()
-                # Paths only: device identifiers and other values stay out of output.
                 print(
                     json.dumps(
                         {
-                            "paths": sorted([list(p) for p in raw if not raw[p].ambiguous]),
-                            "ambiguous_paths": sorted([list(p) for p in raw if raw[p].ambiguous]),
+                            "readings": [
+                                {
+                                    "topic": key,
+                                    "path": list(reading.path),
+                                    "writable": reading.write is not None and config.writes,
+                                }
+                                for key, reading in raw.items()
+                            ]
                         },
                         ensure_ascii=True,
                     )
@@ -42,17 +48,19 @@ async def execute(args, config, secrets):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description="Read-only Lux_WS to MQTT bridge")
+    parser = argparse.ArgumentParser(description="Lux_WS to MQTT bridge")
     parser.add_argument("--config", required=True, type=Path)
     parser.add_argument("command", choices=["check", "discover", "once", "run"])
     args = parser.parse_args(argv)
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+    configure()
     try:
         config = load_config(args.config)
         secrets = load_secrets(config, controller_only=args.command == "discover")
         if args.command == "check":
             print("Configuration and secret files are valid; no connections attempted.")
             return 0
+        if args.command == "run":
+            configure(config.state_dir)
         # aiomqtt requires add_reader(), unsupported by Windows' default Proactor loop.
         with contextlib.suppress(asyncio.CancelledError):
             run_async(execute(args, config, secrets))

@@ -1,95 +1,88 @@
-# Running the bridge
+# Deployment
 
-Python 3.9+ is supported. The inspected openHABian host runs Raspberry Pi OS 11
-(32-bit armhf), Python 3.9.2, and systemd 247. No system-Python upgrade is required.
+Runtime: Python 3.9+, MQTT 5 broker, Lux_WS controller. The live openHABian host is
+Raspberry Pi OS 11 (armhf), Python 3.9.2, systemd 247. Its broker accepts MQTT 5;
+no broker or system-Python upgrade is required.
 
-## Windows testing
+## Configuration layout
+
+Copy `config/base.example.toml` to an external `base.toml`, copy `config/mappings`,
+and copy each device example to `devices/<id>.toml`. Set the shared broker/state
+root and each device's URL/language. A device's ID determines its MQTT namespace,
+client ID, and state subdirectory. Both supplied language catalogs use identical
+English topic IDs. Changing the controller language requires updating its device
+file and restarting that instance.
+
+## Windows
+
+Use `%LOCALAPPDATA%\LuxtronikMqtt\config\` for the base, mappings, and devices.
+Set `runtime.state_dir` to an absolute Windows path (forward slashes in TOML work).
+Keep credentials under the protected external `secrets` directory. The helper
+`tools/run-windows.ps1` defaults to the `heatpump_old` device file:
 
 ```powershell
 uv sync --locked
 .\tools\run-windows.ps1 check
 .\tools\run-windows.ps1 discover
-.\tools\run-windows.ps1 once
-.\tools\run-windows.ps1 run
+.\tools\run-windows.ps1 run -Config C:/absolute/config/devices/windows_test.toml
 ```
 
-The helper uses `%LOCALAPPDATA%\LuxtronikMqtt\config\bridge.toml` and the external
-controller secret. `discover` lists sensor paths, flagging ambiguous ones without
-printing values. `once` publishes one cycle then marks the bridge offline. `run`
-polls until Ctrl+C. Do not run two instances against the same topic namespace.
+Give a publishing Windows test instance its own device ID. Discovery is read-only
+and does not connect to MQTT. Never run two publishers for the same device ID.
 
-## openHABian system service
+## openHABian
 
-Use a dedicated `luxtronik-mqtt` account, application under
-`/opt/luxtronik-mqtt-bridge`, configuration under `/etc/luxtronik-mqtt-bridge`, and
-state under `/var/lib/luxtronik-mqtt-bridge`. The supplied
-[systemd unit](../deploy/luxtronik-mqtt-bridge.service) creates the state directory
-and loads the controller password through systemd credentials. The application
-reads `CREDENTIALS_DIRECTORY` directly, including on systemd 247 where `%d` is not
-available in the unit's environment settings.
+Use `/etc/luxtronik-mqtt-bridge/{base.toml,mappings/,devices/}` and the state root
+`/var/lib/luxtronik-mqtt-bridge`. Provision root-owned 0600 credentials under
+`/etc/luxtronik-mqtt-bridge/secrets/<id>-controller-password` (directory 0700).
+The template maps each into its private systemd credential directory as
+`controller-password`; credentials never enter command lines or the repository.
 
-The [installer](../deploy/install.sh) takes a staging directory containing the
-built wheel, `requirements.lock`, and `luxtronik-mqtt-bridge.service`. Its parent
-must contain the external `bridge.toml` and `secrets/controller-password`:
+Stage the built 0.2.0 wheel, `requirements.lock`, `deploy/install.sh`,
+`deploy/luxtronik-mqtt-bridge@.service`, and an external `config/` directory.
+Run:
 
 ```sh
-sudo sh deploy/install.sh /absolute/path/to/staging
+sudo sh /absolute/staging/install.sh /absolute/staging heatpump_new heatpump_old
 ```
 
-It creates the account/virtualenv, installs locked dependencies, preserves existing
-configuration and secrets, and enables the service. The installer requires system
-`python3`, `venv`, and `pip`, which are present on the inspected host. It does not
-need `ensurepip` or an OS upgrade.
-
-Install the built wheel into a virtualenv using `requirements.lock` with
-`pip install --require-hashes -r requirements.lock`, then install the wheel with
-`--no-deps`. A host missing `ensurepip` can create the environment with
-`python3 -m venv --without-pip` and use system pip's `--target` option to populate
-that environment's `lib/python3.9/site-packages`. The service invokes the virtualenv
-Python directly, so pip-generated console-script interpreter paths are irrelevant.
-
-Copy the example configuration outside the checkout; set the controller URL,
-broker address, and mapped sensor paths. For an intentionally anonymous LAN broker,
-set `authentication = "none"`, `tls = false`, and `port = 1883`. TLS/authentication
-remain the example defaults. `state_dir` must match the service's state directory.
-Store the controller password in `/etc/luxtronik-mqtt-bridge/secrets/controller-password`
-with root-only permissions; systemd passes a read-only copy to the service.
-
-For an authenticated broker, add `LoadCredential` entries named `mqtt-username`
-and `mqtt-password` through a systemd drop-in. The application reads these from
-the credential directory too. Explicit `MQTT_USERNAME_FILE` / `MQTT_PASSWORD_FILE`
-paths override this; the optional `secret-paths.env` contains paths only.
-Validate the unit before enabling it:
+The installer builds a versioned virtualenv without replacing system Python,
+validates staged and installed config, preserves existing base/device config,
+updates language mappings, then activates each template instance. The original
+single-instance service is stopped/disabled. Previous virtualenv releases and the
+original `.venv` are retained for rollback. Review MQTT state after activation.
 
 ```sh
-sudo systemd-analyze verify /etc/systemd/system/luxtronik-mqtt-bridge.service
-sudo systemctl daemon-reload
-sudo systemctl enable --now luxtronik-mqtt-bridge
-sudo journalctl -u luxtronik-mqtt-bridge -n 30 --no-pager
+systemctl status luxtronik-mqtt-bridge@heatpump_new
+systemctl status luxtronik-mqtt-bridge@heatpump_old
+sudo tail -n 20 /var/lib/luxtronik-mqtt-bridge/heatpump_old/bridge.log
 ```
 
-The older test controller's verified XML protocol is implemented. FW 3.92 still
-needs authenticated fixtures and a 24-hour hardware soak. Unknown formats fail
-explicitly; no legacy API fallback or controller-write commands exist.
+A healthy instance may have no log file. Runtime warning/error logs rotate at
+1 MiB, retaining two backups per instance, and repeated errors are rate-limited.
+Only early startup errors reach stderr/journald; the unit rate-limits those too.
+No per-reading or per-poll messages are emitted, even at debug level.
 
-## Operations
+For broker authentication add systemd `LoadCredential` entries named `mqtt-username`
+and `mqtt-password` via a template drop-in. Configure TLS in the shared base;
+certificate/hostname verification cannot be disabled. `secret-paths.env`, if used,
+contains only absolute paths, never credential values.
 
-- Stop: `sudo systemctl stop luxtronik-mqtt-bridge`; retained availability becomes
-  offline. An unexpected process death uses MQTT's Last Will.
-- Updates: stop the service, preserve its current wheel and dependency lock, install
-  the new locked dependencies/wheel, then restart and verify fresh readings. Roll
-  back using the saved wheel and matching lock. Keep config/secrets/state external.
-- Rotation: replace the protected credential file, restart, and revoke the old
-  credential. Never put credential values in command lines or environment files.
-- Mapping changes: remove a sensor from config and restart; its old retained topic
-  is cleared using `published-topics.json`. Keep this manifest across upgrades.
-  A changed namespace needs a separate state directory; the bridge won't erase
-  topics in another namespace. Retire old namespaces explicitly in the broker.
-- Diagnostics: logs include failure categories, never raw frames or login values.
-  `check` validates config/secret files without network access. For protocol work,
-  `tools/inspect_controller.py` stores captures only outside the checkout.
-- Freshness: consumers must require availability `online`, reading quality `good`,
-  and a recent `observed_at`. Retained readings can outlive a controller or broker.
+## Upgrade, rollback, and migration
 
-The broker account needs publish access only to `luxtronik/<device_id>/v1/#`;
-the service has no subscriptions. Subscribers such as openHAB need read access.
+A service instance uses `/opt/luxtronik-mqtt-bridge/current/bin/python`. To roll
+back, stop both instances, point `current` to the prior release, restore its matching
+base/mappings/device files, then restart and check MQTT availability. Keep copies
+of configuration when making schema changes. The installer preserves releases,
+but does not automatically roll back after a failed hardware connection.
+
+Version 0.2 replaces the monolithic config and `/v1/readings/<key>` topics. The old
+namespace should remain offline until its consumers migrate. Clear only its owned
+retained topics using the old manifest; never bulk-clear unrelated broker topics.
+Each current namespace has a separate manifest that removes obsolete JSON and scalar
+topics when its mappings change. Preserve manifests across restarts.
+
+Only initial/changed observations are published, so retained `observed_at` is not
+a heartbeat. Consumers must check availability and quality. Setting commands go
+to `/value` without retention; `/result` reports readback or rejection. A broker
+account needs publish/subscribe rights only within its assigned device namespace.

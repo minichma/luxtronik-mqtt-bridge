@@ -1,15 +1,12 @@
 # openHAB example
 
-Adapt the broker definition (or reuse an existing MQTT Bridge), then copy the
-`.things`, `.items`, and `.rules` files into the corresponding openHAB config
-directories. Install MQTT and JSONPath add-ons. Configure broker credentials in
-the existing broker Thing, not in this repository.
+Install MQTT binding and JSONPath transformation, then adapt the broker and device
+ID in `luxtronik.things`. The example subscribes to JSON state and availability;
+`luxtronik.items` and `luxtronik.rules` expose whether the reading is usable.
 
-The temperature channel extracts `value` and assigns °C. Separate channels expose
-quality and observation time. The rule sets `Luxtronik_OutdoorFresh` only when
-availability, quality, and timestamp all permit use; automations must check it.
-An offline Thing does not guarantee that a retained Item value is cleared.
-
-This is a reference configuration, not automatically installed into openHAB.
-Check it against the target openHAB version; channel syntax is documented in the
-[MQTT binding](https://www.openhab.org/addons/bindings/mqtt/).
+Unchanged values are not republished. Do not expire them by their old observation
+timestamp: use availability and quality. For commands configure a channel's
+`commandTopic` as the writable reading's `/value` topic with `retained=false`.
+Use the JSON topic for authoritative state: `/value` also carries incoming commands
+before they are validated. Inspect the reading's `possible_values` and `/result`.
+These examples have not been imported into the user's openHAB instance.

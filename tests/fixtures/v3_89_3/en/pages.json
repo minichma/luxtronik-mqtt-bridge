@@ -1,0 +1,86 @@
+[
+  {
+    "path": [
+      "information"
+    ],
+    "file": "page0.xml"
+  },
+  {
+    "path": [
+      "settings"
+    ],
+    "file": "page1.xml"
+  },
+  {
+    "path": [
+      "timers",
+      "heating",
+      "week"
+    ],
+    "file": "schedule0-1.xml"
+  },
+  {
+    "path": [
+      "timers",
+      "heating",
+      "5+2"
+    ],
+    "file": "schedule0-2.xml"
+  },
+  {
+    "path": [
+      "timers",
+      "heating",
+      "days (Mo, Tu...)"
+    ],
+    "file": "schedule0-3.xml"
+  },
+  {
+    "path": [
+      "timers",
+      "domestic hot water",
+      "week"
+    ],
+    "file": "schedule1-1.xml"
+  },
+  {
+    "path": [
+      "timers",
+      "domestic hot water",
+      "5+2"
+    ],
+    "file": "schedule1-2.xml"
+  },
+  {
+    "path": [
+      "timers",
+      "domestic hot water",
+      "days (Mo, Tu...)"
+    ],
+    "file": "schedule1-3.xml"
+  },
+  {
+    "path": [
+      "timers",
+      "swimming pool",
+      "week"
+    ],
+    "file": "schedule2-1.xml"
+  },
+  {
+    "path": [
+      "timers",
+      "swimming pool",
+      "5+2"
+    ],
+    "file": "schedule2-2.xml"
+  },
+  {
+    "path": [
+      "timers",
+      "swimming pool",
+      "days (Mo, Tu...)"
+    ],
+    "file": "schedule2-3.xml"
+  }
+]

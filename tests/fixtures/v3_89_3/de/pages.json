@@ -1,0 +1,86 @@
+[
+  {
+    "path": [
+      "Informationen"
+    ],
+    "file": "page0.xml"
+  },
+  {
+    "path": [
+      "Einstellungen"
+    ],
+    "file": "page1.xml"
+  },
+  {
+    "path": [
+      "Zeitschaltprogramm",
+      "Heizung",
+      "Woche"
+    ],
+    "file": "schedule0-1.xml"
+  },
+  {
+    "path": [
+      "Zeitschaltprogramm",
+      "Heizung",
+      "5+2"
+    ],
+    "file": "schedule0-2.xml"
+  },
+  {
+    "path": [
+      "Zeitschaltprogramm",
+      "Heizung",
+      "Tage (Mo, Di...)"
+    ],
+    "file": "schedule0-3.xml"
+  },
+  {
+    "path": [
+      "Zeitschaltprogramm",
+      "Warmwasser",
+      "Woche"
+    ],
+    "file": "schedule1-1.xml"
+  },
+  {
+    "path": [
+      "Zeitschaltprogramm",
+      "Warmwasser",
+      "5+2"
+    ],
+    "file": "schedule1-2.xml"
+  },
+  {
+    "path": [
+      "Zeitschaltprogramm",
+      "Warmwasser",
+      "Tage (Mo, Di...)"
+    ],
+    "file": "schedule1-3.xml"
+  },
+  {
+    "path": [
+      "Zeitschaltprogramm",
+      "Schwimmbad",
+      "Woche"
+    ],
+    "file": "schedule2-1.xml"
+  },
+  {
+    "path": [
+      "Zeitschaltprogramm",
+      "Schwimmbad",
+      "5+2"
+    ],
+    "file": "schedule2-2.xml"
+  },
+  {
+    "path": [
+      "Zeitschaltprogramm",
+      "Schwimmbad",
+      "Tage (Mo, Di...)"
+    ],
+    "file": "schedule2-3.xml"
+  }
+]

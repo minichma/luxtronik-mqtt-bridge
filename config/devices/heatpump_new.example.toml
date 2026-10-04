@@ -1,0 +1,6 @@
+base = "../base.toml"
+
+[device]
+id = "heatpump_new"
+url = "ws://192.0.2.10:8214/"
+language = "en"

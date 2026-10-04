@@ -15,6 +15,13 @@ jobs:
         with:
           version: '0.12.9'
           python-version: ${{ matrix.python }}
+      - if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y mosquitto
+      - if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          choco install mosquitto -y --no-progress
+          'C:\Program Files\mosquitto' | Out-File -FilePath $env:GITHUB_PATH -Append
       - run: uv sync --locked
       - run: uv run --locked ruff check src tests tools
       - run: uv run --locked ruff format --check src tests tools

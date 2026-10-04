@@ -1,4 +1,5 @@
 import asyncio
+import shutil
 import sys
 from dataclasses import replace
 from pathlib import Path
@@ -15,18 +16,45 @@ def pytest_asyncio_loop_factories():
 
 
 @pytest.fixture
-def config(tmp_path):
-    example = Path(__file__).parents[1] / "config" / "bridge.example.toml"
-    text = example.read_text(encoding="utf-8").replace(
-        'state_dir = "/var/lib/luxtronik-mqtt-bridge"',
-        'state_dir = "' + (tmp_path / "state").as_posix() + '"',
+def config_files(tmp_path):
+    source = Path(__file__).parents[1] / "config"
+    shutil.copytree(source / "mappings", tmp_path / "mappings")
+    text = (
+        (source / "base.example.toml")
+        .read_text("utf-8")
+        .replace("/var/lib/luxtronik-mqtt-bridge", (tmp_path / "state").as_posix())
     )
-    path = tmp_path / "bridge.toml"
-    path.write_text(text, encoding="utf-8")
-    settings = load_config(path)
-    return replace(settings, mqtt_auth="none", mqtt_tls=False, timeout=0.3, poll=0.05, stale=0.5)
+    (tmp_path / "base.toml").write_text(text, encoding="utf-8")
+    (tmp_path / "device.toml").write_text(
+        'base = "base.toml"\n[device]\nid = "test"\n'
+        'url = "ws://192.0.2.10:8214/"\nlanguage = "de"\n',
+        encoding="utf-8",
+    )
+    return tmp_path
+
+
+@pytest.fixture
+def full_config(config_files):
+    return load_config(config_files / "device.toml")
+
+
+@pytest.fixture
+def config(full_config):
+    wanted = {
+        "information/temperatures/flow",
+        "information/temperatures/outdoortemperature",
+        "settings/temperatures/loweringto",
+        "settings/modeofoperation/heatingcircuit",
+    }
+    return replace(
+        full_config,
+        sensors=tuple(s for s in full_config.sensors if s.key in wanted),
+        timeout=1,
+        poll=0.1,
+        stale=3,
+    )
 
 
 @pytest.fixture
 def fixture_dir():
-    return Path(__file__).parent / "fixtures" / "v3_89_3_de"
+    return Path(__file__).parent / "fixtures" / "v3_89_3" / "de"

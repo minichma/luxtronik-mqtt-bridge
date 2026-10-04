@@ -1,7 +1,7 @@
 param(
     [ValidateSet('check', 'discover', 'once', 'run')]
     [string]$Command = 'check',
-    [string]$Config = (Join-Path $env:LOCALAPPDATA 'LuxtronikMqtt\config\bridge.toml')
+    [string]$Config = (Join-Path $env:LOCALAPPDATA 'LuxtronikMqtt\config\devices\heatpump_old.toml')
 )
 $ErrorActionPreference = 'Stop'
 if (-not $env:LUXTRONIK_PASSWORD_FILE) {

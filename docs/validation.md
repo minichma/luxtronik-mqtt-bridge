@@ -1,25 +1,40 @@
 # Validation record
 
-As of 2026-10-02:
+As of 2026-10-03:
 
-- **44 tests passed** on Windows / Python 3.13 and Linux / Python 3.11.
-  Coverage includes XML parsing, missing/invalid values, duplicate paths, changed
-  IDs, credential redaction, retained topics, a process-crash Last Will, broker
-  restart, stale detection, and orderly shutdown despite cancellation races.
-- Ruff lint/format checks pass; wheel and source distribution build successfully.
-- Actual openHABian: Raspberry Pi OS 11, 32-bit armhf, Python 3.9.2, systemd 247.
-  An isolated virtualenv runs the bridge without changing system Python.
-- `luxtronik-mqtt-bridge.service` is enabled and running as `luxtronik-mqtt`.
-  Controller credentials reside outside source, mode 0600 root-owned, delivered
-  through systemd's credential directory. State is mode 0600 under the service account.
-- The real German **V3.89.3** controller and supplied MQTT broker were tested.
-  Two fresh complete cycles containing eight good readings were observed with
-  availability online after final deployment: three temperatures, compressor
-  hours/starts/running status, total heat, and total input energy.
-- The host's `/var/log` filesystem is full and its journal reported truncation.
-  MQTT delivery was verified directly; existing logs were not removed.
+- **59 tests pass** on Windows/Python 3.13 and Linux/Python 3.11. Real Mosquitto 2
+  integration covers MQTT 5 noLocal/retention behavior, validated writes/readback,
+  uncertain-write recovery without replay, broker restart, and crash Last Will.
+  Unit tests cover both complete language catalogs, XML bounds, duplicates,
+  refresh omissions, choices/ranges/timers, cancellation, and bounded log rotation.
+- Ruff lint/format checks pass; the 0.2.0 wheel builds successfully.
+- Read-only live scans found **271 readings / 137 writable fields** on the larger
+  heat pump and **195 readings / 78 writable fields** on the older one. Both report
+  V3.89.3 and are configured in German. English mappings come from an authorized
+  English capture of the larger controller and are tested against sanitized fixtures.
+- Both systemd template instances are enabled/running on openHABian (Python 3.9.2),
+  with zero restarts. The former single-instance service is stopped and disabled.
+  Its eight retained readings and metadata were cleared; legacy availability stays offline.
+  Per-device credentials are root-owned 0600; config/state/secrets remain external.
+- A 65-second observation after deployment saw 32 and 26 changed JSON readings,
+  **zero unchanged JSON repeats**, and both instances online. Their full retained
+  snapshots contain 271 and 195 JSON readings plus scalar value subtopics.
+- Live MQTT same-value commands returned `unchanged` for both pumps. No operating
+  settings were changed. An earlier direct same-value SET/SAVE verified the wire
+  transaction and unchanged readback. Changed-value writes are tested with a fake
+  controller and real disposable broker.
+- Neither running instance created an error log during verification. Runtime logs
+  are warning/error only, rate-limited, and capped at three 1 MiB files per device.
+  Existing unrelated host logs were not deleted or reconfigured.
 
-**Not yet validated:** FW 3.92, the 24-hour firmware acceptance soak, login failure
-behavior on real hardware, and importing the reference configuration into openHAB.
-Tests of failure cases use a fake controller and disposable broker; the shared
-live broker and controller settings were not disrupted.
+On 2026-10-04, separate site configuration files were copied directly into openHAB:
+two Things, 56 `_xxnew` Items (31 MQTT channels), and five JavaScript transforms.
+Original files remained unchanged. Local channel-link and conversion checks passed;
+openHAB 4.0.4 was active and its feature registry recorded JavaScript scripting as
+started. Live item values/Thing status are still unverified: REST requires credentials
+and the full host log filesystem limited log-based verification. The repository's
+generic examples were not imported; deployed artifacts remain outside source.
+
+**Remaining:** FW 3.92 hardware/encoding validation, a 24-hour outage-inclusive soak,
+real-hardware login failure behavior, and live openHAB Thing/item verification.
+The live broker was not restarted or upgraded; it already supports MQTT 5.

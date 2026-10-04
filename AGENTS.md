@@ -1,133 +1,187 @@
-# Project architecture and working rules
+# Architecture and working rules
 
-These instructions apply to the entire repository. Record changes to decisions
-here, including their rationale, and update PLAN.md when milestones complete.
+Apply throughout the repository. The project supports readings and validated writes.
 
-## ADR-001: Read-only Lux_WS integration
+## Documentation and continuity
 
-Accepted: target Luxtronik 2.1 firmware 3.92 using WebSockets with the exact
-subprotocol `Lux_WS`. Port 8214 is configurable and verified on V3.89.3. Do not
-implement, probe, or fall back to the legacy API on ports 8888/8889.
+Keep **AGENTS.md and README.md up to date on every relevant change**, in the same
+change as the implementation or deployment work. Review both before finishing:
+update AGENTS for architecture, module responsibilities, invariants, workflow, and
+handoff information; update README for user-visible behavior, configuration,
+commands, compatibility, and limitations. Do not leave contradictory instructions.
+Keep PLAN.md concise and update affected docs/examples when their claims change.
+Record evidence and outstanding verification in docs/validation.md, with dates;
+distinguish files installed, service running, and behavior actually verified.
 
-Expose readings only. Allow only verified authentication, navigation, and read
-operations; do not implement a generic command sender in the public interface.
-No controller settings, setpoints, operating modes, or service parameters may
-be changed. Do not copy the write capabilities of upstream clients.
+At the start of work, read this file, README.md, PLAN.md, and relevant detailed docs;
+inspect git status and existing changes before editing. Preserve unrelated work.
+Use the structure below when extending the project; avoid parallel implementations,
+temporary diagnostics in production code, and reorganizations without a concrete
+need. Document any changed boundaries here so another agent can resume without
+conversation history. Keep operational handoff notes outside source when they
+contain site configuration; never copy secrets or raw captures into documentation.
 
-The V3.89.3 test controller confirms XML navigation/content, login, and full
-information GET reads. Implement this verified variant; treat it as provisional
-for FW 3.92 until authenticated fixtures and hardware tests are available.
-Unknown encodings fail explicitly; do not add speculative JSON support based on
-community claims. Authentication failure fixtures are synthetic. See
-docs/protocol-research.md for evidence and limits.
+## Repository structure and responsibilities
 
-## ADR-002: Standalone Python service
+| Location | Responsibility |
+| --- | --- |
+| `src/luxtronik_mqtt/cli.py`, `__main__.py` | CLI configuration, check/discover/once/run entry points |
+| `config.py` | Layered configuration validation and external secret loading |
+| `protocol.py` | Bounded XML parsing, navigation, snapshots, refresh merging, write metadata |
+| `controller.py` | Lux_WS sessions, page selection, sampling, serialized controller writes/readback |
+| `model.py` | Value normalization, constraints, command encoding, scalar representation |
+| `publisher.py` | MQTT connection/subscription options, retained state, change detection, topic manifest |
+| `service.py` | Read/command orchestration, reconnects, availability, cancellation and shutdown |
+| `compat.py`, `logging_config.py` | Platform/runtime compatibility and bounded logging |
+| `config/` | Generic base/device examples and paired language catalogs; no actual site config |
+| `deploy/` | Versioned-release installer and systemd template |
+| `tests/` | Unit/controller/service tests, disposable broker integration, sanitized bilingual fixtures |
+| `tools/` | Offline mapping builder and Windows launcher; no credentials or live capture output |
+| `examples/openhab/` | Generic consumer examples, separate from the deployed site configuration |
+| `docs/`, `PLAN.md` | Protocol evidence, deployment/secrets/validation guides, concise remaining work |
 
-Accepted: Python with asyncio, separate from openHAB and ioBroker. Deploy on
-openHABian as a systemd service; support Windows console execution for testing
-using the same package, CLI, and configuration. Use a virtualenv with minimum
-Python 3.9: the actual 32-bit Bullseye host uses Python 3.9.2. Do not replace system
-Python. Development tools require Python 3.11+.
-Dependencies: `websockets` for transport, `aiomqtt` for MQTT, and `defusedxml`
-for XML. Use `tomli` and `async-timeout` only below Python 3.11; newer Python uses
-its standard-library equivalents. This keeps both platforms on the same core.
-Verify dependency APIs and supported versions when implementation begins; pin
-the resolved dependency set in a lockfile. Do not add legacy Luxtronik libraries.
-Verify dependencies and event-loop compatibility on both platforms. Keep systemd
-integration outside the portable core; support graceful console shutdown on Windows.
+Module filenames without a directory above are under `src/luxtronik_mqtt/`.
+Keep protocol/model logic independent of MQTT transport; service coordinates the
+layers. Put localized paths/translations in mappings rather than transport code.
+Treat topic IDs, config schema, units and command semantics as consumer contracts:
+document migration and rollback when changing them. Regenerate both language
+catalogs together and check sanitized fixture coverage; do not hand-edit one locale
+into a different topic hierarchy. Runtime dependency changes must keep pyproject.toml,
+uv.lock and deployment requirements.lock consistent.
 
-Keep layers separate: configuration/secret loading, Lux_WS transport and session,
-protocol decoding/discovery, typed readings/mapping, MQTT publishing, and service
-lifecycle. Keep parsing and normalization pure and testable. A controller session
-must have one reader and at most one outstanding request until response
-correlation is proven. Discover IDs on every connection; never persist transient
-controller IDs as stable sensor identities.
+## Controller protocol
 
-## ADR-003: Stable, explicit reading model
+Use Luxtronik 2.1 Lux_WS on configurable port 8214. Never probe or fall back to
+legacy ports 8888/8889. XML navigation/content is verified on two V3.89.3 units;
+FW 3.92 remains unverified. Reject unknown formats instead of guessing encodings.
 
-Accepted: map a verified menu path and locale to a configured stable sensor key
-(e.g. `outdoor_temperature`). Do not derive public keys solely from ephemeral IDs
-or flattened labels. Reject ambiguous configured mappings and duplicate keys;
-unselected duplicate paths (such as Eingänge/HD) do not invalidate other readings. Unknown
-readings can be inventoried but are not automatically assigned public topics.
+Use LOGIN and discovered navigation IDs. Keep one information connection and, if
+needed, one settings/schedules connection per heat pump. GET selects a page and
+builds its ID index; REFRESH updates the selected page between selections.
+Information/settings poll every 30 seconds; schedules are scanned every 300 seconds.
+Every schedule scan also reloads full information/settings metadata and history.
+After schedule scans, reselect settings so subsequent polls use REFRESH.
+IDs are transient and reused for unrelated fields across pages: never persist them
+or deduplicate globally by ID. Rebuild the index after GET and every reconnect.
 
-Each reading carries value, unit, UTC observation timestamp, quality, and source
-path. Parse full values, including decimal commas, units, booleans, durations,
-and textual states using fixture-backed rules. Invalid numeric data becomes
-`null` with quality `invalid`, never zero. No NaN or Infinity in JSON. An absent
-configured reading is `null` with quality `unavailable`. Preserve raw values only
-in explicitly enabled, sanitized diagnostics stored outside the source tree.
+REFRESH contains unchanged values and omits some static fields. Keep omitted
+fields with their original observation timestamps; do not invent fresh observations.
+The first occurrence of a full path or repeated ID within a page wins. Later
+duplicates are ignored; equal values alone never identify duplicates. History rows
+use positional topics, retaining the actual dated navigation path in JSON.
 
-## ADR-004: MQTT v1 contract
+Disable automatic WebSocket pings: the observed controllers closed connections
+at the 20-second ping interval. Request timeouts and a monotonic freshness deadline
+provide liveness checks. Bound frame size (1 MiB), depth, item count, and queues.
 
-Accepted: MQTT 3.1.1, QoS 1, retained readings and retained availability. Namespace
-`luxtronik/<device_id>/v1`; the configured device ID must be stable and contain
-no topic separators or MQTT wildcards. A deployment must have a unique client ID.
+## Configuration and language mappings
 
-- `.../readings/<sensor_key>`: JSON object with `value`, `unit`, `observed_at`,
-  and `quality`. `observed_at` is bridge receipt time in UTC, not controller time.
-- `.../availability`: `online` or `offline`. Configure retained `offline` as
-  the Last Will before connecting. Publish `offline` on startup and orderly stop.
-- `.../metadata`: retained schema version, configured device ID, mapped sensor
-  keys/units, and verified firmware if available; exclude credentials and serials.
+Keep actual configuration and credentials outside source. Three layers:
+- Shared base: broker, timing, write enablement, mapping directory, state root.
+- Language mappings: full localized paths, page selection, canonical English
+  hierarchical topic IDs, types, units, and English choice translations.
+- Per-device file: base reference, stable ID, controller URL, language, and optional
+  controller/runtime overrides. Derive MQTT prefix/client ID/state directory from ID.
 
-Example reading (synthetic):
-`{"value":7.5,"unit":"degC","observed_at":"2026-10-01T18:00:00Z","quality":"good"}`.
+Use paired German/English controller captures as the primary naming source. Expand
+abbreviations using the manufacturer glossary; lowercase alphanumeric topic levels
+contain no punctuation or spaces. Numbered devices/circuits have separate numeric
+levels. Both language catalogs must contain the same topic IDs. Do not invent
+mappings for hardware absent from the captured navigation. Missing device features
+produce no topics; mappings cover all captured information, settings, and timers.
+Access-code entry and remote-control buttons/images are not telemetry.
 
-Publish online only after discovery and a complete successful polling cycle has
-been published. Publish offline on controller disconnect or if no complete cycle
-has succeeded within the freshness limit (initially 120 seconds). Individual
-missing/invalid readings keep explicit quality; a complete cycle means all mapped
-readings have an outcome, not that all values are good. A subscriber must check
-availability, observation age, and reading quality: retained values alone are
-not proof of freshness. QoS 1 permits duplicates; consumers must be idempotent.
+## MQTT contract (schema 2)
 
-On broker reconnect publish offline, then a newly collected cycle, then online.
-Do not replay old values as fresh. Stop acquisition during broker outages; keep
-no backlog and reconnect the controller before the next cycle. Clear obsolete
-retained reading topics with empty
-retained payloads when a mapping is deliberately removed, using an external
-published-topic manifest; never erase unrelated topics.
+Require MQTT 5. Prefix is `<topic_root>/<device_id>`, default `luxtronik/<device_id>`.
+Each mapped topic holds retained QoS 1 JSON with value, unit, observed_at, quality,
+actual path, writable, and possible_values. Its `/value` subtopic holds a scalar;
+null is the literal `null`. Choices use the captured English option text; numbers
+use declared units. Invalid/missing controller values are never converted to zero.
 
-## ADR-005: Polling and recovery
+Publish all available readings initially and on controller/broker reconnect. During
+normal operation publish only semantic changes (value, quality, path, constraints,
+or other metadata), excluding timestamp-only changes. Publish scalar state only
+when its value/quality changes, or to correct/confirm a command. Unchanged timestamps
+can be old: consumers check availability/quality, not age of the retained last-change
+message. Availability is retained online/offline, emitted on transitions, with an
+offline Last Will. Mark offline on disconnect or stale cycles (120 seconds default).
 
-Accepted: start with 30-second cycles and 10-second operation timeouts; tune after
-hardware verification. Never overlap cycles. Limit frame size (initially 1 MiB),
-navigation depth, and discovered item count. Reconnect with exponential backoff
-and jitter, capped at 60 seconds; use slower retries for authentication failures.
-Reset backoff after a successful cycle, not merely a TCP connection.
+Use a per-device manifest to clear only obsolete retained JSON/scalar topics in the
+owned prefix. Never erase unrelated topics. Broker reconnect discards queued commands
+and starts controller discovery again; there is no telemetry or command backlog.
 
-Rediscover navigation and invalidate old IDs after reconnect. Treat malformed
-frames, unsupported protocol formats, and timeouts as explicit failures. Never
-silently claim healthy operation. Use monotonic time for freshness/deadlines and
-UTC for published timestamps. Handle termination with an offline publish and
-bounded shutdown. No unbounded retry queues or raw frame logging.
+## Writable settings
 
-## ADR-006: Secrets and deployment
+Only expose supported fields with controller-declared write metadata. Re-read the
+page before each write, resolve the current ID, and validate against current choices,
+minimum/maximum/step/divisor or timer format. Implement observed combo, slider, and
+timer types. Unsupported/incomplete metadata stays read-only. No arbitrary command
+sender, access escalation, remote-control keystrokes, or guessed write addresses.
 
-Accepted: actual configuration and credential files live outside the checkout.
-Tracked configuration contains examples and external secret references only.
-Secret-file paths come from environment variables or systemd's
-`CREDENTIALS_DIRECTORY`; credential values do not.
-Reject absent, empty, or unreadable required secrets with redacted errors; no
-default controller password. Never log login messages, passwords, full config,
-credential-bearing URLs, or raw authentication frames, including at debug level.
+Subscribe to `/value` using MQTT 5 noLocal, retainAsPublished, and retainHandling=2.
+This prevents state echoes and retained replays from becoming commands. Reject live
+retained commands too. Commands are bounded scalar UTF-8 payloads, with a bounded
+queue and expiry. Serialize reads and writes. SET stages a value; SAVE;1 returns
+Content; GET readback confirms success. Never optimistically publish requested state
+or retry uncertain writes. Same-value commands are no-ops. Publish non-retained
+`/result` statuses. Read-only fields reject writes. Preserve actual state after errors.
 
-Use an openHABian systemd service with a dedicated unprivileged account, external
-configuration under `/etc/luxtronik-mqtt-bridge`, and runtime state under
-`/var/lib/luxtronik-mqtt-bridge`. Prefer systemd credentials where supported;
-otherwise use restricted external secret files. Containers are not required.
-Use restricted NTFS ACLs for Windows testing. See docs/secrets.md. MQTT supports
-TLS with certificate verification; never disable verification as a workaround.
-If Lux_WS only supports unencrypted WS, run it on a trusted, isolated LAN with
-no internet exposure. The controller password travels unencrypted in that case.
+## Runtime, secrets, and logs
 
-## Verification and delivery rules
+Python 3.9+ with asyncio, websockets, aiomqtt, and defusedxml. Use tomli/async-timeout
+below 3.11. Windows uses a Selector event loop. Keep layers separate and normalize
+values with pure functions. Test tools require Python 3.11+ and real Mosquitto 2
+(native or disposable Docker), including MQTT 5 subscription behavior.
 
-Implement against sanitized firmware-specific fixtures. Test parsing, missing
-data, identity stability, reconnects, stale availability, credential redaction,
-and broker failure using a fake controller and disposable MQTT broker. Keep live
-hardware tests opt-in. No secrets or unredacted captures in fixtures or commits.
-Do not claim deployment or FW 3.92 validation from mocks. No unnecessary tests
-for documentation-only changes. Do not introduce cloud dependencies, controller
-writes, or new discovery protocols without an explicit scope change.
+Deploy one systemd template instance per device as an unprivileged service account.
+Keep versioned virtualenv releases under /opt, config under /etc, and per-device
+state under /var/lib. Use systemd LoadCredential or absolute external secret-file
+paths. Environment variables contain paths only. Secret files are root-owned 0600;
+Windows uses restricted NTFS ACLs. Never log credentials, raw frames, full config,
+command payloads, or transport exception contents. Wire loggers remain disabled.
+
+No per-reading or per-poll logs at any level. Runtime logs are warning/error only,
+rate-limited per logger/severity to once per minute, with one 1 MiB rotating file and
+two backups per device. No routine output to the system journal. Early startup
+errors use stderr; the systemd unit additionally rate-limits journal output.
+
+## Verification and delivery
+
+Use the development commands in README.md. Run focused tests for changed behavior;
+for cross-layer protocol/config/MQTT changes, run the full suite with real Mosquitto 2,
+Ruff lint/format checks, and a wheel build. Documentation-only changes need link,
+command and consistency checks, not a runtime test rerun. Test changed Windows and
+Linux behavior as applicable; report unavailable checks instead of implying success.
+
+Use sanitized bilingual fixtures. Test mapping coverage, duplicate selection,
+refresh omissions, reconnect identities, numeric/choice/timer write validation,
+readback, command echoes/replays, retained state, broker outages, cancellation,
+and log bounds. Live verification must not change operating settings merely to test
+a path; use unchanged-value checks unless a specific change is requested.
+Do not claim FW 3.92 or a 24-hour soak from mocks or V3.89.3 tests. Keep site data,
+raw captures, and secrets outside git. Do not push without the user's instruction.
+
+## openHAB integration handoff
+
+Install site Things/Items/transforms by copying files into the openHAB configuration
+directory, not through the API. Keep original files intact; parallel new Items use
+the `_xxnew` suffix on every declared item name. Existing rules still reference the
+original names, so copied helper/derived items do not gain rule behavior automatically.
+Reuse the existing broker Thing. Read authoritative JSON for state, reject unavailable
+quality, disable optimistic updates for controlled Items, and send non-retained
+commands only for verified writable channels. Preserve legacy numeric mode values
+with explicit transformations; do not guess equivalents for missing WS fields.
+
+As of 2026-10-04, external site artifacts are under
+`%LOCALAPPDATA%\LuxtronikMqtt\openhab\heatpump-mqtt\` (including migration notes).
+They were copied to `/etc/openhab/items/heatpump-mqtt.items`,
+`/etc/openhab/things/heatpump-mqtt.things`, and
+`/etc/openhab/transform/luxmqtt-*.js`: 56 suffixed Items, two Things, 31 MQTT channels.
+openHAB 4.0.4 was running and JavaScript scripting was recorded as started; live
+item values/Thing status remain unverified. REST authentication and a full host log
+filesystem limited verification. Do not delete unrelated logs or change authentication
+to work around this. If read-only API verification is used, obtain credentials via
+an external protected file and never log them. Repository examples were not imported.
+Parallel heating shift and numeric operating status remain unlinked; flow reports
+unavailable and hot-water target is read-only. See external notes before migrating rules.

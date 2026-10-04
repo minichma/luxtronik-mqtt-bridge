@@ -1,6 +1,6 @@
 # Credentials outside the source tree
 
-The repository contains only example configuration. Actual configuration and the
+The repository contains example configuration and sanitized language mappings. Actual configuration and the
 supplied controller login are stored externally; the loader accepts file paths
 through environment variables and never logs the values.
 
@@ -36,8 +36,7 @@ and secret-file contract with the paths and ACLs described above.
 
 Actual site configuration, diagnostic captures, and runtime state also belong
 outside the checkout. Tracked examples use reserved addresses. Broker access
-should permit publishing only within this bridge's namespace, with no command
-subscriptions. Authentication may be explicitly disabled only for a broker that
+should permit publishing only within this bridge's namespace, and subscribing only to its own command namespace. Authentication may be explicitly disabled only for a broker that
 is intentionally configured to allow it; never silently downgrade on failure.
 
 ## Logging, rotation, and accidental exposure

@@ -1,45 +1,59 @@
-# Lux_WS evidence and verification gap
+# Lux_WS evidence and limits
 
-Research date: 2026-10-01. These are community implementations, not a manufacturer
-protocol specification.
+## Hardware observations
 
-## Local observation
+Read-only captures on 2026-10-01/02 and a same-value write on 2026-10-02 cover two
+Luxtronik 2.1 controllers reporting **V3.89.3**. German captures exist for both;
+the larger navigation was also captured after the user switched it to English.
+Raw captures remain external. Sanitized bilingual fixtures reproduce observed
+structure without addresses, credentials, serials, or actual history timestamps.
 
-On 2026-10-01, the authorized controller reported **V3.89.3**, German UI. Its
-public web client and authenticated read-only probes confirmed `ws://<host>:8214/`,
-`Lux_WS`, `LOGIN`, XML `Navigation`, and `GET;<discovered information ID>` returning
-full XML `Content`. A second GET also returned complete information. `REFRESH`
-returned partial `values`; the bridge uses full GET cycles instead.
+The public web client served by the controller (`Webserver/Lux.js`) establishes:
+- `ws://<controller>:8214/`, subprotocol `Lux_WS`, `LOGIN;<password>` → Navigation.
+- `GET;<navigation id>` → Content. Settings/timers may omit the root name.
+- `REFRESH` → values for the currently selected page, without names.
+- `SET;set_<field id>;<raw value>` stages a setting without a response.
+- `SAVE;1` → Content; a subsequent GET verifies actual state.
 
-The content root has no ID. Sections repeat their names, and `Eingänge/HD` appears
-twice with different types. Preserve these quirks in sanitized fixtures. Login
-rejection and session longevity remain unverified on hardware. Initial one-shot
-tests verified five readings and orderly offline status on exit. Final deployment
-verified eight readings in consecutive cycles (see validation.md). Keep installation
-addresses, credentials, and raw captures external.
+A captured information GET contained 83 value nodes and REFRESH contained 73,
+all unchanged, with ten omitted. REFRESH is not changed-only. The bridge caches
+omitted observations without changing their timestamp and reloads full pages at
+the schedule interval to detect history/metadata changes. Repeated GET allocates
+page-local IDs; unrelated fields and different schedule pages can reuse IDs.
+Timer grouping nodes may have no ID. Duplicate named paths select their first item.
 
-## Published implementations
+Automatic WebSocket pings caused sessions to close at 20 seconds. With pings
+disabled, successive 30-second refreshes work in one session. Application request
+and freshness timeouts detect unresponsive connections.
 
-| Primary source | Evidence | Limitation |
-| --- | --- | --- |
-| [civiale/ioBroker adapter](https://github.com/civiale/iobroker.luxtronik2ws) and [implementation](https://github.com/civiale/iobroker.luxtronik2ws/blob/main/main.js) | Reports testing on 3.92.2. Connects on 8214 with `Lux_WS`, sends `LOGIN` and `GET`, and decodes JSON. | A report of compatibility, not independent verification of this controller. |
-| [BenPru Python probe](https://gist.github.com/BenPru/ec463ea835fb705b070939c793196f2e) | Uses port 8214 and `Lux_WS`, then parses XML navigation/content and follows discovered IDs. | Older example; not evidence for the exact 3.92 wire format. |
-| [hansmi/wp2reg-luxws](https://github.com/hansmi/wp2reg-luxws) | Existing Go protocol/client and Prometheus exporter; reports testing on 3.85.6. | Different firmware and output system. |
-| [sieukrem/luxtronik2-ws-api](https://github.com/sieukrem/luxtronik2-ws-api) | Reverse-engineered client traverses the web interface's menu hierarchy. | Does not establish compatibility with this controller. |
+The controller declares writable fields via `raw` plus type/constraints. Observed
+sliders provide min/max/step/div; combos provide raw-code/label options; timers
+encode start minutes in the low 16 bits and end minutes in the high 16 bits. The
+bridge follows these observed types, revalidates before writing, and never elevates
+access. The live write check submitted the existing value unchanged and verified
+unchanged readback. Mocks exercise changed values and failure paths.
 
-Conclusion: implement the observed XML variant. The conflicting JSON claims remain
-unresolved for FW 3.92; do not infer compatibility from version numbers. Support
-only fixture-backed formats and fail explicitly on unknown responses.
+## Naming and coverage
 
-Do not hard-code IDs from sample controllers. Confirm whether reads require
-`GET`, `REFRESH`, or a particular sequence, whether refreshes contain partial
-updates, and whether the server requires Origin or other handshake headers.
-Confirm what login failure looks like instead of assuming an open socket means
-authentication succeeded. Determine whether multiple clients are tolerated.
+The 271 canonical topic mappings use the controller's English wording, expanded
+where abbreviated. Numeric instances become separate levels. German paths and
+English choice labels are paired by matching captured page structure, not transient
+IDs. Both supplied pumps' captured information/settings fields are covered, plus
+all captured heating/hot-water/swimming-pool timer views. Fields absent on a model
+produce no topics. The access-code page and remote-control image/buttons are not
+telemetry or exposed commands.
 
-The project requirement establishes that port 8889 is unavailable. This project
-does not depend on generalized claims about when the legacy API disappeared.
+Abbreviation expansions are informed by the manufacturer's
+[controller manual](https://www.alpha-innotec.cz/wp-content/uploads/2019/02/controller-part-2-2.pdf)
+and [comfort-board manual](https://www.alpha-innotec.cz/wp-content/uploads/2019/02/manual.pdf).
+The English labels remain available verbatim in the English mapping paths.
 
-References are for research, not vendored implementations. Before adopting code
-or a library, review its maintenance, license, dependencies, and actual firmware
-coverage, and record a commit/version alongside the resulting fixtures.
+## Firmware gap
+
+The [ioBroker implementation](https://github.com/civiale/iobroker.luxtronik2ws/blob/main/main.js)
+reports 3.92.2 with JSON. Older XML implementations include
+[BenPru's probe](https://gist.github.com/BenPru/ec463ea835fb705b070939c793196f2e)
+and [wp2reg-luxws](https://github.com/hansmi/wp2reg-luxws).
+These are community implementations, not a manufacturer protocol specification.
+FW 3.92 must be tested independently; do not infer its encoding from version numbers.
+There is no legacy TCP fallback, speculative JSON handling, or generic write sender.

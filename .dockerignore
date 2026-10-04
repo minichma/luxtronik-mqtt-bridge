@@ -10,6 +10,10 @@
 **/*.local.*
 config/*
 !config/*.example.toml
+!config/mappings
+!config/mappings/*.toml
+!config/devices
+!config/devices/*.example.toml
 captures
 state
 logs

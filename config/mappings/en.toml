@@ -1,0 +1,1734 @@
+# Based on paired V3.89.3 captures; topics use expanded English labels.
+language = "en"
+information_label = "information"
+
+[[readings]]
+topic = "information/temperatures/flow"
+page = ["information"]
+path = ["information", "temperatures", "flow"]
+type = "number"
+unit = "degC"
+
+[[readings]]
+topic = "information/temperatures/return"
+page = ["information"]
+path = ["information", "temperatures", "return"]
+type = "number"
+unit = "degC"
+
+[[readings]]
+topic = "information/temperatures/returntarget"
+page = ["information"]
+path = ["information", "temperatures", "return target"]
+type = "number"
+unit = "degC"
+
+[[readings]]
+topic = "information/temperatures/returnexternal"
+page = ["information"]
+path = ["information", "temperatures", "return external"]
+type = "number"
+unit = "degC"
+
+[[readings]]
+topic = "information/temperatures/hotgas"
+page = ["information"]
+path = ["information", "temperatures", "hot gas"]
+type = "number"
+unit = "degC"
+
+[[readings]]
+topic = "information/temperatures/outdoortemperature"
+page = ["information"]
+path = ["information", "temperatures", "outdoor temp."]
+type = "number"
+unit = "degC"
+
+[[readings]]
+topic = "information/temperatures/outdoortemp"
+page = ["information"]
+path = ["information", "temperatures", "outdoor temp. ø"]
+type = "number"
+unit = "degC"
+
+[[readings]]
+topic = "information/temperatures/domestichotwater"
+page = ["information"]
+path = ["information", "temperatures", "DHW"]
+type = "number"
+unit = "degC"
+
+[[readings]]
+topic = "information/temperatures/domestichotwater/target"
+page = ["information"]
+path = ["information", "temperatures", "DHW target"]
+type = "number"
+unit = "degC"
+
+[[readings]]
+topic = "information/temperatures/heatsourceinlet"
+page = ["information"]
+path = ["information", "temperatures", "heat source inlet"]
+type = "number"
+unit = "degC"
+
+[[readings]]
+topic = "information/temperatures/heatsourceoutlet"
+page = ["information"]
+path = ["information", "temperatures", "heat source outlet"]
+type = "number"
+unit = "degC"
+
+[[readings]]
+topic = "information/temperatures/mixingcircuit/1/flow"
+page = ["information"]
+path = ["information", "temperatures", "mix circ1 flow"]
+type = "number"
+unit = "degC"
+
+[[readings]]
+topic = "information/temperatures/mixingcircuit/1/target"
+page = ["information"]
+path = ["information", "temperatures", "mix circ1 target"]
+type = "number"
+unit = "degC"
+
+[[readings]]
+topic = "information/temperatures/mixingcircuit/3/flow"
+page = ["information"]
+path = ["information", "temperatures", "MC3 flow"]
+type = "number"
+unit = "degC"
+
+[[readings]]
+topic = "information/temperatures/mixingcircuit/3/flowtarget"
+page = ["information"]
+path = ["information", "temperatures", "MC3 flow target"]
+type = "number"
+unit = "degC"
+
+[[readings]]
+topic = "information/temperatures/maximumflowtemperature"
+page = ["information"]
+path = ["information", "temperatures", "max. flow temp."]
+type = "number"
+unit = "degC"
+
+[[readings]]
+topic = "information/temperatures/suctioncompressor"
+page = ["information"]
+path = ["information", "temperatures", "suction compressor"]
+type = "number"
+unit = "degC"
+
+[[readings]]
+topic = "information/temperatures/overheating"
+page = ["information"]
+path = ["information", "temperatures", "overheating"]
+type = "number"
+unit = "K"
+
+[[readings]]
+topic = "information/temperatures/targetoverheating"
+page = ["information"]
+path = ["information", "temperatures", "target overheating"]
+type = "number"
+unit = "K"
+
+[[readings]]
+topic = "information/inputs/defrostbrinepressureflow"
+page = ["information"]
+path = ["information", "inputs", "ASD"]
+type = "boolean"
+
+[[readings]]
+topic = "information/inputs/electricitysupply"
+page = ["information"]
+path = ["information", "inputs", "EVU"]
+type = "boolean"
+
+[[readings]]
+topic = "information/inputs/highpressure"
+page = ["information"]
+path = ["information", "inputs", "HD"]
+type = "boolean"
+
+[[readings]]
+topic = "information/inputs/motorprotection"
+page = ["information"]
+path = ["information", "inputs", "MOT"]
+type = "boolean"
+
+[[readings]]
+topic = "information/inputs/swimmingpoolthermostat"
+page = ["information"]
+path = ["information", "inputs", "SWT"]
+type = "boolean"
+
+[[readings]]
+topic = "information/inputs/analoginput/21"
+page = ["information"]
+path = ["information", "inputs", "analog in 21"]
+type = "number"
+unit = "V"
+
+[[readings]]
+topic = "information/inputs/analoginput/22"
+page = ["information"]
+path = ["information", "inputs", "analog in 22"]
+type = "number"
+unit = "V"
+
+[[readings]]
+topic = "information/inputs/lowpressure"
+page = ["information"]
+path = ["information", "inputs", "ND"]
+type = "number"
+unit = "bar"
+
+[[readings]]
+topic = "information/inputs/flowrate"
+page = ["information"]
+path = ["information", "inputs", "flow rate"]
+type = "number"
+unit = "l/h"
+
+[[readings]]
+topic = "information/outputs/domestichotwaterpump"
+page = ["information"]
+path = ["information", "outputs", "BUP - DHW pump"]
+type = "boolean"
+
+[[readings]]
+topic = "information/outputs/floorheatingpump/1"
+page = ["information"]
+path = ["information", "outputs", "FP 1"]
+type = "boolean"
+
+[[readings]]
+topic = "information/outputs/heatingcirculationpump"
+page = ["information"]
+path = ["information", "outputs", "HUP"]
+type = "boolean"
+
+[[readings]]
+topic = "information/outputs/mixer/1/open"
+page = ["information"]
+path = ["information", "outputs", "MA1 open"]
+type = "boolean"
+
+[[readings]]
+topic = "information/outputs/mixer/1/close"
+page = ["information"]
+path = ["information", "outputs", "MZ1 close"]
+type = "boolean"
+
+[[readings]]
+topic = "information/outputs/fanwellbrinepump"
+page = ["information"]
+path = ["information", "outputs", "VBO"]
+type = "boolean"
+
+[[readings]]
+topic = "information/outputs/compressor"
+page = ["information"]
+path = ["information", "outputs", "compressor"]
+type = "boolean"
+
+[[readings]]
+topic = "information/outputs/circulationpump"
+page = ["information"]
+path = ["information", "outputs", "ZIP"]
+type = "boolean"
+
+[[readings]]
+topic = "information/outputs/additionalcirculationpump"
+page = ["information"]
+path = ["information", "outputs", "ZUP"]
+type = "boolean"
+
+[[readings]]
+topic = "information/outputs/additionalheatgenerator/1"
+page = ["information"]
+path = ["information", "outputs", "ZWE 1"]
+type = "boolean"
+
+[[readings]]
+topic = "information/outputs/additionalheatgenerator/2/collectivefault"
+page = ["information"]
+path = ["information", "outputs", "ZWE 2 - SST"]
+type = "boolean"
+
+[[readings]]
+topic = "information/outputs/additionalheatgenerator/3"
+page = ["information"]
+path = ["information", "outputs", "ZWE 3"]
+type = "boolean"
+
+[[readings]]
+topic = "information/outputs/solarcirculationpump"
+page = ["information"]
+path = ["information", "outputs", "SLP"]
+type = "boolean"
+
+[[readings]]
+topic = "information/outputs/floorheatingpump/2"
+page = ["information"]
+path = ["information", "outputs", "FP2"]
+type = "boolean"
+
+[[readings]]
+topic = "information/outputs/mixer/3/open"
+page = ["information"]
+path = ["information", "outputs", "MA3"]
+type = "boolean"
+
+[[readings]]
+topic = "information/outputs/mixer/3/close"
+page = ["information"]
+path = ["information", "outputs", "MZ3"]
+type = "boolean"
+
+[[readings]]
+topic = "information/outputs/floorheatingpump/3"
+page = ["information"]
+path = ["information", "outputs", "FP3"]
+type = "boolean"
+
+[[readings]]
+topic = "information/outputs/analogoutput/1"
+page = ["information"]
+path = ["information", "outputs", "AO 1"]
+type = "number"
+unit = "V"
+
+[[readings]]
+topic = "information/outputs/analogoutput/2"
+page = ["information"]
+path = ["information", "outputs", "AO 2"]
+type = "number"
+unit = "V"
+
+[[readings]]
+topic = "information/outputs/analogoutput/21"
+page = ["information"]
+path = ["information", "outputs", "AO 21"]
+type = "number"
+unit = "V"
+
+[[readings]]
+topic = "information/outputs/analogoutput/22"
+page = ["information"]
+path = ["information", "outputs", "AO 22"]
+type = "number"
+unit = "V"
+
+[[readings]]
+topic = "information/elapsedtimes/heatpumpsince"
+page = ["information"]
+path = ["information", "elapsed times", "HP since"]
+type = "duration"
+unit = "s"
+
+[[readings]]
+topic = "information/elapsedtimes/additionalheatgenerator/1/since"
+page = ["information"]
+path = ["information", "elapsed times", "ZWE1 since"]
+type = "duration"
+unit = "s"
+
+[[readings]]
+topic = "information/elapsedtimes/netinputdelay"
+page = ["information"]
+path = ["information", "elapsed times", "net-input delay"]
+type = "duration"
+unit = "s"
+
+[[readings]]
+topic = "information/elapsedtimes/switchingcycleblocktime"
+page = ["information"]
+path = ["information", "elapsed times", "SCB time"]
+type = "duration"
+unit = "s"
+
+[[readings]]
+topic = "information/elapsedtimes/compressoroffsince"
+page = ["information"]
+path = ["information", "elapsed times", "CP off since"]
+type = "duration"
+unit = "s"
+
+[[readings]]
+topic = "information/elapsedtimes/heatingcontroladdtime"
+page = ["information"]
+path = ["information", "elapsed times", "hc add-time"]
+type = "duration"
+unit = "s"
+
+[[readings]]
+topic = "information/elapsedtimes/heatingcontrollesstime"
+page = ["information"]
+path = ["information", "elapsed times", "hc less-time"]
+type = "duration"
+unit = "s"
+
+[[readings]]
+topic = "information/elapsedtimes/thermaldisinfectionsince"
+page = ["information"]
+path = ["information", "elapsed times", "TDI since"]
+type = "duration"
+unit = "s"
+
+[[readings]]
+topic = "information/elapsedtimes/blockadedomestichotwater"
+page = ["information"]
+path = ["information", "elapsed times", "blockade DHW"]
+type = "duration"
+unit = "s"
+
+[[readings]]
+topic = "information/elapsedtimes/releaseadditionalheatgeneratordomestichotwater"
+page = ["information"]
+path = ["information", "elapsed times", "release ZWE DHW"]
+type = "duration"
+unit = "s"
+
+[[readings]]
+topic = "information/elapsedtimes/releasecooling"
+page = ["information"]
+path = ["information", "elapsed times", "release cooling"]
+type = "duration"
+unit = "s"
+
+[[readings]]
+topic = "information/operatinghours/compressor/1/operatinghours"
+page = ["information"]
+path = ["information", "operating hours", "operating hours VD1"]
+type = "number"
+unit = "h"
+
+[[readings]]
+topic = "information/operatinghours/compressor/1/impulses"
+page = ["information"]
+path = ["information", "operating hours", "impulse VD1"]
+type = "number"
+
+[[readings]]
+topic = "information/operatinghours/runningtimevd1"
+page = ["information"]
+path = ["information", "operating hours", "running time Ø VD1"]
+type = "text"
+
+[[readings]]
+topic = "information/operatinghours/additionalheatgenerator/1/operatinghours"
+page = ["information"]
+path = ["information", "operating hours", "operating hours ZWE1"]
+type = "number"
+unit = "h"
+
+[[readings]]
+topic = "information/operatinghours/heatpump"
+page = ["information"]
+path = ["information", "operating hours", "operating hours HP"]
+type = "number"
+unit = "h"
+
+[[readings]]
+topic = "information/operatinghours/heating"
+page = ["information"]
+path = ["information", "operating hours", "operat. hours heat."]
+type = "number"
+unit = "h"
+
+[[readings]]
+topic = "information/operatinghours/domestichotwater"
+page = ["information"]
+path = ["information", "operating hours", "operating hours DHW"]
+type = "number"
+unit = "h"
+
+[[readings]]
+topic = "information/operatinghours/photovoltaicamount"
+page = ["information"]
+path = ["information", "operating hours", "amount PV"]
+type = "number"
+unit = "h"
+
+[[readings]]
+topic = "information/errormemory/1"
+page = ["information"]
+path = ["information", "error memory", "*"]
+type = "text"
+position = 1
+
+[[readings]]
+topic = "information/errormemory/2"
+page = ["information"]
+path = ["information", "error memory", "*"]
+type = "text"
+position = 2
+
+[[readings]]
+topic = "information/errormemory/3"
+page = ["information"]
+path = ["information", "error memory", "*"]
+type = "text"
+position = 3
+
+[[readings]]
+topic = "information/errormemory/4"
+page = ["information"]
+path = ["information", "error memory", "*"]
+type = "text"
+position = 4
+
+[[readings]]
+topic = "information/errormemory/5"
+page = ["information"]
+path = ["information", "error memory", "*"]
+type = "text"
+position = 5
+
+[[readings]]
+topic = "information/switchoffs/1"
+page = ["information"]
+path = ["information", "switch offs", "*"]
+type = "text"
+position = 1
+
+[[readings]]
+topic = "information/switchoffs/2"
+page = ["information"]
+path = ["information", "switch offs", "*"]
+type = "text"
+position = 2
+
+[[readings]]
+topic = "information/switchoffs/3"
+page = ["information"]
+path = ["information", "switch offs", "*"]
+type = "text"
+position = 3
+
+[[readings]]
+topic = "information/switchoffs/4"
+page = ["information"]
+path = ["information", "switch offs", "*"]
+type = "text"
+position = 4
+
+[[readings]]
+topic = "information/switchoffs/5"
+page = ["information"]
+path = ["information", "switch offs", "*"]
+type = "text"
+position = 5
+
+[[readings]]
+topic = "information/systemstatus/typeofheatpump"
+page = ["information"]
+path = ["information", "system status", "type of heat pump"]
+type = "text"
+
+[[readings]]
+topic = "information/systemstatus/softwareversion"
+page = ["information"]
+path = ["information", "system status", "software version"]
+type = "text"
+
+[[readings]]
+topic = "information/systemstatus/revision"
+page = ["information"]
+path = ["information", "system status", "Revision"]
+type = "number"
+
+[[readings]]
+topic = "information/systemstatus/inputoutputboard"
+page = ["information"]
+path = ["information", "system status", "Max/IO"]
+type = "text"
+
+[[readings]]
+topic = "information/systemstatus/controller"
+page = ["information"]
+path = ["information", "system status", "controller"]
+type = "text"
+
+[[readings]]
+topic = "information/systemstatus/bivalencelevel"
+page = ["information"]
+path = ["information", "system status", "bivalence level"]
+type = "number"
+
+[[readings]]
+topic = "information/systemstatus/operationmode"
+page = ["information"]
+path = ["information", "system status", "operation mode"]
+type = "text"
+
+[[readings]]
+topic = "information/energymonitor/heatquantity/heating"
+page = ["information"]
+path = ["information", "energy monitor", "heat quantity", "heating"]
+type = "number"
+unit = "kWh"
+
+[[readings]]
+topic = "information/energymonitor/heatquantity/domestichotwater"
+page = ["information"]
+path = ["information", "energy monitor", "heat quantity", "domestic hot water"]
+type = "number"
+unit = "kWh"
+
+[[readings]]
+topic = "information/energymonitor/heatquantity/total"
+page = ["information"]
+path = ["information", "energy monitor", "heat quantity", "total"]
+type = "number"
+unit = "kWh"
+
+[[readings]]
+topic = "information/energymonitor/energyinput/heating"
+page = ["information"]
+path = ["information", "energy monitor", "energy input", "heating"]
+type = "number"
+unit = "kWh"
+
+[[readings]]
+topic = "information/energymonitor/energyinput/domestichotwater"
+page = ["information"]
+path = ["information", "energy monitor", "energy input", "domestic hot water"]
+type = "number"
+unit = "kWh"
+
+[[readings]]
+topic = "information/energymonitor/energyinput/total"
+page = ["information"]
+path = ["information", "energy monitor", "energy input", "total"]
+type = "number"
+unit = "kWh"
+
+[[readings]]
+topic = "information/buildingmanagementsystem/type"
+page = ["information"]
+path = ["information", "BMS", "type"]
+type = "text"
+
+[[readings]]
+topic = "settings/modeofoperation/heatingcircuit"
+page = ["settings"]
+path = ["settings", "mode of operation", "heating circuit"]
+type = "enum"
+options = { "0" = "automatic", "1" = "add. heat gen.", "2" = "party", "3" = "holiday", "4" = "off" }
+
+[[readings]]
+topic = "settings/modeofoperation/mixingcircuit/3"
+page = ["settings"]
+path = ["settings", "mode of operation", "mixing circuit 3"]
+type = "enum"
+options = { "0" = "automatic", "2" = "party", "3" = "holiday", "4" = "off" }
+
+[[readings]]
+topic = "settings/modeofoperation/domestichotwater"
+page = ["settings"]
+path = ["settings", "mode of operation", "domestic hot water"]
+type = "enum"
+options = { "0" = "automatic", "1" = "add. heat gen.", "2" = "party", "3" = "holiday", "4" = "off" }
+
+[[readings]]
+topic = "settings/modeofoperation/photovoltaics"
+page = ["settings"]
+path = ["settings", "mode of operation", "photovoltaics"]
+type = "enum"
+options = { "0" = "automatic", "4" = "off" }
+
+[[readings]]
+topic = "settings/temperatures/returntemperaturelimit"
+page = ["settings"]
+path = ["settings", "temperatures", "return temp. limit."]
+type = "number"
+unit = "degC"
+
+[[readings]]
+topic = "settings/temperatures/hysteresisheating"
+page = ["settings"]
+path = ["settings", "temperatures", "hysteresis heating"]
+type = "number"
+unit = "K"
+
+[[readings]]
+topic = "settings/temperatures/hysteresisdomestichotwater"
+page = ["settings"]
+path = ["settings", "temperatures", "hysteresis DHW"]
+type = "number"
+unit = "K"
+
+[[readings]]
+topic = "settings/temperatures/maximumreturnincrease"
+page = ["settings"]
+path = ["settings", "temperatures", "max. return increase"]
+type = "number"
+unit = "K"
+
+[[readings]]
+topic = "settings/temperatures/releaseadditionalheatgenerator"
+page = ["settings"]
+path = ["settings", "temperatures", "release ZWE"]
+type = "number"
+unit = "degC"
+
+[[readings]]
+topic = "settings/temperatures/thermaldisinfectiontargettemperature"
+page = ["settings"]
+path = ["settings", "temperatures", "TDI target temp."]
+type = "number"
+unit = "degC"
+
+[[readings]]
+topic = "settings/temperatures/minimumheatsourcetemperature"
+page = ["settings"]
+path = ["settings", "temperatures", "min. heat source temp."]
+type = "number"
+unit = "degC"
+
+[[readings]]
+topic = "settings/temperatures/maximumhotgastemperature"
+page = ["settings"]
+path = ["settings", "temperatures", "max. hot gas temp."]
+type = "number"
+unit = "degC"
+
+[[readings]]
+topic = "settings/temperatures/loweringto"
+page = ["settings"]
+path = ["settings", "temperatures", "lowering to"]
+type = "number"
+unit = "degC"
+
+[[readings]]
+topic = "settings/temperatures/maximumflowtemperature"
+page = ["settings"]
+path = ["settings", "temperatures", "max. flow temp."]
+type = "number"
+unit = "degC"
+
+[[readings]]
+topic = "settings/temperatures/ton"
+page = ["settings"]
+path = ["settings", "temperatures", "Δt - on"]
+type = "number"
+unit = "K"
+
+[[readings]]
+topic = "settings/temperatures/toff"
+page = ["settings"]
+path = ["settings", "temperatures", "Δt - off"]
+type = "number"
+unit = "K"
+
+[[readings]]
+topic = "settings/temperatures/ttankmax"
+page = ["settings"]
+path = ["settings", "temperatures", "Δt - tank max."]
+type = "number"
+unit = "degC"
+
+[[readings]]
+topic = "settings/temperatures/externalenergysourcetemperatureheating"
+page = ["settings"]
+path = ["settings", "temperatures", "TEE heating"]
+type = "number"
+unit = "K"
+
+[[readings]]
+topic = "settings/temperatures/externalenergysourcetemperaturedomestichotwater"
+page = ["settings"]
+path = ["settings", "temperatures", "TEE DHW"]
+type = "number"
+unit = "K"
+
+[[readings]]
+topic = "settings/temperatures/minimumheatsourceinletmaximumflow"
+page = ["settings"]
+path = ["settings", "temperatures", "min HS in flow max."]
+type = "number"
+unit = "degC"
+
+[[readings]]
+topic = "settings/temperatures/flowoperationlimit"
+page = ["settings"]
+path = ["settings", "temperatures", "flow operation limit"]
+type = "number"
+unit = "degC"
+
+[[readings]]
+topic = "settings/temperatures/hysteresiscoolingcircuit"
+page = ["settings"]
+path = ["settings", "temperatures", "hysteresis CC"]
+type = "number"
+unit = "K"
+
+[[readings]]
+topic = "settings/temperatures/domestichotwatermaximumtemperature"
+page = ["settings"]
+path = ["settings", "temperatures", "DHW temp. max."]
+type = "number"
+unit = "degC"
+
+[[readings]]
+topic = "settings/temperatures/minimumreturntargettemperature"
+page = ["settings"]
+path = ["settings", "temperatures", "min return targ.temp"]
+type = "number"
+unit = "degC"
+
+[[readings]]
+topic = "settings/temperatures/mixingcircuit/1/minimumflow"
+page = ["settings"]
+path = ["settings", "temperatures", "minimal flow MC 1"]
+type = "number"
+unit = "degC"
+
+[[readings]]
+topic = "settings/temperatures/mixingcircuit/1/maximumflow"
+page = ["settings"]
+path = ["settings", "temperatures", "maximum flow MC 1"]
+type = "number"
+unit = "degC"
+
+[[readings]]
+topic = "settings/temperatures/mixingcircuit/3/minimumflow"
+page = ["settings"]
+path = ["settings", "temperatures", "minimal flow MC 3"]
+type = "number"
+unit = "degC"
+
+[[readings]]
+topic = "settings/temperatures/mixingcircuit/3/maximumflow"
+page = ["settings"]
+path = ["settings", "temperatures", "maximum flow MC 3"]
+type = "number"
+unit = "degC"
+
+[[readings]]
+topic = "settings/temperatures/heatingcircuit/nightlowering"
+page = ["settings"]
+path = ["settings", "temperatures", "night lowering HC"]
+type = "number"
+unit = "degC"
+
+[[readings]]
+topic = "settings/temperatures/mixingcircuit/1/nightlowering"
+page = ["settings"]
+path = ["settings", "temperatures", "night lowering MC1"]
+type = "number"
+unit = "degC"
+
+[[readings]]
+topic = "settings/temperatures/mixingcircuit/3/nightlowering"
+page = ["settings"]
+path = ["settings", "temperatures", "night lowering MC3"]
+type = "number"
+unit = "degC"
+
+[[readings]]
+topic = "settings/systemsettings/electricitysupplycutoff"
+page = ["settings"]
+path = ["settings", "system settings", "EVU cut-off"]
+type = "text"
+
+[[readings]]
+topic = "settings/systemsettings/remotecontrol"
+page = ["settings"]
+path = ["settings", "system settings", "remote control"]
+type = "enum"
+options = { "0" = "no", "4" = "RBE", "6" = "Smart" }
+
+[[readings]]
+topic = "settings/systemsettings/integration"
+page = ["settings"]
+path = ["settings", "system settings", "integration"]
+type = "text"
+
+[[readings]]
+topic = "settings/systemsettings/mixingcircuit/1"
+page = ["settings"]
+path = ["settings", "system settings", "mixing circuit 1"]
+type = "text"
+
+[[readings]]
+topic = "settings/systemsettings/mixingcircuit/2"
+page = ["settings"]
+path = ["settings", "system settings", "mixing circuit 2"]
+type = "text"
+
+[[readings]]
+topic = "settings/systemsettings/mixingcircuit/3"
+page = ["settings"]
+path = ["settings", "system settings", "mixing circuit 3"]
+type = "text"
+
+[[readings]]
+topic = "settings/systemsettings/error"
+page = ["settings"]
+path = ["settings", "system settings", "error"]
+type = "text"
+
+[[readings]]
+topic = "settings/systemsettings/domestichotwater/1"
+page = ["settings"]
+path = ["settings", "system settings", "DHW 1"]
+type = "enum"
+options = { "0" = "sensor", "1" = "Thermostat" }
+
+[[readings]]
+topic = "settings/systemsettings/domestichotwater/2"
+page = ["settings"]
+path = ["settings", "system settings", "DHW 2"]
+type = "text"
+
+[[readings]]
+topic = "settings/systemsettings/domestichotwater/3"
+page = ["settings"]
+path = ["settings", "system settings", "DHW 3"]
+type = "text"
+
+[[readings]]
+topic = "settings/systemsettings/domestichotwater/4"
+page = ["settings"]
+path = ["settings", "system settings", "DHW 4"]
+type = "text"
+
+[[readings]]
+topic = "settings/systemsettings/domestichotwater/5"
+page = ["settings"]
+path = ["settings", "system settings", "DHW 5"]
+type = "text"
+
+[[readings]]
+topic = "settings/systemsettings/domestichotwaterheatpumpmaximum"
+page = ["settings"]
+path = ["settings", "system settings", "DHW+HP max"]
+type = "number"
+unit = "h"
+
+[[readings]]
+topic = "settings/systemsettings/pumpoptimization"
+page = ["settings"]
+path = ["settings", "system settings", "pump optimization"]
+type = "enum"
+options = { "0" = "no", "1" = "yes" }
+
+[[readings]]
+topic = "settings/systemsettings/access"
+page = ["settings"]
+path = ["settings", "system settings", "access"]
+type = "text"
+
+[[readings]]
+topic = "settings/systemsettings/brinepressureflow"
+page = ["settings"]
+path = ["settings", "system settings", "brine pres/flow"]
+type = "text"
+
+[[readings]]
+topic = "settings/systemsettings/compressormonitoring"
+page = ["settings"]
+path = ["settings", "system settings", "monitoring VD"]
+type = "text"
+
+[[readings]]
+topic = "settings/systemsettings/heatingcircuit/control"
+page = ["settings"]
+path = ["settings", "system settings", "control HC"]
+type = "text"
+
+[[readings]]
+topic = "settings/systemsettings/mixingcircuit/1/control"
+page = ["settings"]
+path = ["settings", "system settings", "control MC1"]
+type = "text"
+
+[[readings]]
+topic = "settings/systemsettings/mixingcircuit/2/control"
+page = ["settings"]
+path = ["settings", "system settings", "control MC2"]
+type = "text"
+
+[[readings]]
+topic = "settings/systemsettings/mixingcircuit/3/control"
+page = ["settings"]
+path = ["settings", "system settings", "control MC3"]
+type = "text"
+
+[[readings]]
+topic = "settings/systemsettings/screedheating"
+page = ["settings"]
+path = ["settings", "system settings", "screed heating"]
+type = "enum"
+options = { "0" = "with mixer", "1" = "no mixer" }
+
+[[readings]]
+topic = "settings/systemsettings/electricalanode"
+page = ["settings"]
+path = ["settings", "system settings", "electrical anode"]
+type = "text"
+
+[[readings]]
+topic = "settings/systemsettings/heatinglimit"
+page = ["settings"]
+path = ["settings", "system settings", "heating limit"]
+type = "enum"
+options = { "0" = "no", "1" = "yes" }
+
+[[readings]]
+topic = "settings/systemsettings/parallelmode"
+page = ["settings"]
+path = ["settings", "system settings", "parallel mode"]
+type = "text"
+
+[[readings]]
+topic = "settings/systemsettings/remotemaintenance"
+page = ["settings"]
+path = ["settings", "system settings", "remote maintenance"]
+type = "enum"
+options = { "0" = "no", "1" = "yes" }
+
+[[readings]]
+topic = "settings/systemsettings/pumpoptimizationtime"
+page = ["settings"]
+path = ["settings", "system settings", "pump optim. time"]
+type = "number"
+unit = "min"
+
+[[readings]]
+topic = "settings/systemsettings/solarcontrol"
+page = ["settings"]
+path = ["settings", "system settings", "solar control"]
+type = "enum"
+options = { "0" = "temp. diff.", "1" = "standard", "2" = "solar HP" }
+
+[[readings]]
+topic = "settings/systemsettings/activecooling"
+page = ["settings"]
+path = ["settings", "system settings", "active cooling"]
+type = "text"
+
+[[readings]]
+topic = "settings/systemsettings/fanwellbrinepumpflow"
+page = ["settings"]
+path = ["settings", "system settings", "flow VBO"]
+type = "number"
+unit = "min"
+
+[[readings]]
+topic = "settings/systemsettings/thermaldisinfectionmessage"
+page = ["settings"]
+path = ["settings", "system settings", "TDI message"]
+type = "text"
+
+[[readings]]
+topic = "settings/systemsettings/heatpumpheatsourcemedium"
+page = ["settings"]
+path = ["settings", "system settings", "heat source medium HP"]
+type = "text"
+
+[[readings]]
+topic = "settings/systemsettings/multifunctiontank"
+page = ["settings"]
+path = ["settings", "system settings", "multifunction tank"]
+type = "enum"
+options = { "0" = "no", "1" = "yes" }
+
+[[readings]]
+topic = "settings/systemsettings/releaseadditionalheatgeneratorheating"
+page = ["settings"]
+path = ["settings", "system settings", "release ZWE Heat."]
+type = "number"
+unit = "min"
+
+[[readings]]
+topic = "settings/systemsettings/releaseadditionalheatgeneratordomestichotwater"
+page = ["settings"]
+path = ["settings", "system settings", "release ZWE DHW"]
+type = "text"
+
+[[readings]]
+topic = "settings/systemsettings/domestichotwaterpostheating"
+page = ["settings"]
+path = ["settings", "system settings", "DHW postheating"]
+type = "enum"
+options = { "0" = "no", "1" = "yes" }
+
+[[readings]]
+topic = "settings/systemsettings/domestichotwaterpostheatingmaximum"
+page = ["settings"]
+path = ["settings", "system settings", "DHW postheat. max."]
+type = "number"
+unit = "h"
+
+[[readings]]
+topic = "settings/systemsettings/smartgrid"
+page = ["settings"]
+path = ["settings", "system settings", "smart grid"]
+type = "text"
+
+[[readings]]
+topic = "timers/heating/week/mondaysunday/1"
+page = ["timers", "heating", "week"]
+path = ["timers", "heating", "week", "Monday - Sunday", "1)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/heating/week/mondaysunday/2"
+page = ["timers", "heating", "week"]
+path = ["timers", "heating", "week", "Monday - Sunday", "2)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/heating/week/mondaysunday/3"
+page = ["timers", "heating", "week"]
+path = ["timers", "heating", "week", "Monday - Sunday", "3)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/heating/weekdaysandweekend/mondayfriday/1"
+page = ["timers", "heating", "5+2"]
+path = ["timers", "heating", "5+2", "Monday - Friday", "1)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/heating/weekdaysandweekend/mondayfriday/2"
+page = ["timers", "heating", "5+2"]
+path = ["timers", "heating", "5+2", "Monday - Friday", "2)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/heating/weekdaysandweekend/mondayfriday/3"
+page = ["timers", "heating", "5+2"]
+path = ["timers", "heating", "5+2", "Monday - Friday", "3)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/heating/weekdaysandweekend/saturdaysunday/1"
+page = ["timers", "heating", "5+2"]
+path = ["timers", "heating", "5+2", "Saturday - Sunday", "1)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/heating/weekdaysandweekend/saturdaysunday/2"
+page = ["timers", "heating", "5+2"]
+path = ["timers", "heating", "5+2", "Saturday - Sunday", "2)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/heating/weekdaysandweekend/saturdaysunday/3"
+page = ["timers", "heating", "5+2"]
+path = ["timers", "heating", "5+2", "Saturday - Sunday", "3)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/heating/days/sunday/1"
+page = ["timers", "heating", "days (Mo, Tu...)"]
+path = ["timers", "heating", "days (Mo, Tu...)", "Sunday", "1)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/heating/days/sunday/2"
+page = ["timers", "heating", "days (Mo, Tu...)"]
+path = ["timers", "heating", "days (Mo, Tu...)", "Sunday", "2)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/heating/days/sunday/3"
+page = ["timers", "heating", "days (Mo, Tu...)"]
+path = ["timers", "heating", "days (Mo, Tu...)", "Sunday", "3)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/heating/days/monday/1"
+page = ["timers", "heating", "days (Mo, Tu...)"]
+path = ["timers", "heating", "days (Mo, Tu...)", "Monday", "1)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/heating/days/monday/2"
+page = ["timers", "heating", "days (Mo, Tu...)"]
+path = ["timers", "heating", "days (Mo, Tu...)", "Monday", "2)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/heating/days/monday/3"
+page = ["timers", "heating", "days (Mo, Tu...)"]
+path = ["timers", "heating", "days (Mo, Tu...)", "Monday", "3)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/heating/days/tuesday/1"
+page = ["timers", "heating", "days (Mo, Tu...)"]
+path = ["timers", "heating", "days (Mo, Tu...)", "Tuesday", "1)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/heating/days/tuesday/2"
+page = ["timers", "heating", "days (Mo, Tu...)"]
+path = ["timers", "heating", "days (Mo, Tu...)", "Tuesday", "2)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/heating/days/tuesday/3"
+page = ["timers", "heating", "days (Mo, Tu...)"]
+path = ["timers", "heating", "days (Mo, Tu...)", "Tuesday", "3)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/heating/days/wednesday/1"
+page = ["timers", "heating", "days (Mo, Tu...)"]
+path = ["timers", "heating", "days (Mo, Tu...)", "Wednesday", "1)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/heating/days/wednesday/2"
+page = ["timers", "heating", "days (Mo, Tu...)"]
+path = ["timers", "heating", "days (Mo, Tu...)", "Wednesday", "2)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/heating/days/wednesday/3"
+page = ["timers", "heating", "days (Mo, Tu...)"]
+path = ["timers", "heating", "days (Mo, Tu...)", "Wednesday", "3)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/heating/days/thursday/1"
+page = ["timers", "heating", "days (Mo, Tu...)"]
+path = ["timers", "heating", "days (Mo, Tu...)", "Thursday", "1)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/heating/days/thursday/2"
+page = ["timers", "heating", "days (Mo, Tu...)"]
+path = ["timers", "heating", "days (Mo, Tu...)", "Thursday", "2)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/heating/days/thursday/3"
+page = ["timers", "heating", "days (Mo, Tu...)"]
+path = ["timers", "heating", "days (Mo, Tu...)", "Thursday", "3)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/heating/days/friday/1"
+page = ["timers", "heating", "days (Mo, Tu...)"]
+path = ["timers", "heating", "days (Mo, Tu...)", "Friday", "1)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/heating/days/friday/2"
+page = ["timers", "heating", "days (Mo, Tu...)"]
+path = ["timers", "heating", "days (Mo, Tu...)", "Friday", "2)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/heating/days/friday/3"
+page = ["timers", "heating", "days (Mo, Tu...)"]
+path = ["timers", "heating", "days (Mo, Tu...)", "Friday", "3)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/heating/days/saturday/1"
+page = ["timers", "heating", "days (Mo, Tu...)"]
+path = ["timers", "heating", "days (Mo, Tu...)", "Saturday", "1)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/heating/days/saturday/2"
+page = ["timers", "heating", "days (Mo, Tu...)"]
+path = ["timers", "heating", "days (Mo, Tu...)", "Saturday", "2)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/heating/days/saturday/3"
+page = ["timers", "heating", "days (Mo, Tu...)"]
+path = ["timers", "heating", "days (Mo, Tu...)", "Saturday", "3)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/week/mondaysunday/1"
+page = ["timers", "domestic hot water", "week"]
+path = ["timers", "domestic hot water", "week", "Monday - Sunday", "1)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/week/mondaysunday/2"
+page = ["timers", "domestic hot water", "week"]
+path = ["timers", "domestic hot water", "week", "Monday - Sunday", "2)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/week/mondaysunday/3"
+page = ["timers", "domestic hot water", "week"]
+path = ["timers", "domestic hot water", "week", "Monday - Sunday", "3)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/week/mondaysunday/4"
+page = ["timers", "domestic hot water", "week"]
+path = ["timers", "domestic hot water", "week", "Monday - Sunday", "4)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/week/mondaysunday/5"
+page = ["timers", "domestic hot water", "week"]
+path = ["timers", "domestic hot water", "week", "Monday - Sunday", "5)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/weekdaysandweekend/mondayfriday/1"
+page = ["timers", "domestic hot water", "5+2"]
+path = ["timers", "domestic hot water", "5+2", "Monday - Friday", "1)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/weekdaysandweekend/mondayfriday/2"
+page = ["timers", "domestic hot water", "5+2"]
+path = ["timers", "domestic hot water", "5+2", "Monday - Friday", "2)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/weekdaysandweekend/mondayfriday/3"
+page = ["timers", "domestic hot water", "5+2"]
+path = ["timers", "domestic hot water", "5+2", "Monday - Friday", "3)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/weekdaysandweekend/mondayfriday/4"
+page = ["timers", "domestic hot water", "5+2"]
+path = ["timers", "domestic hot water", "5+2", "Monday - Friday", "4)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/weekdaysandweekend/mondayfriday/5"
+page = ["timers", "domestic hot water", "5+2"]
+path = ["timers", "domestic hot water", "5+2", "Monday - Friday", "5)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/weekdaysandweekend/saturdaysunday/1"
+page = ["timers", "domestic hot water", "5+2"]
+path = ["timers", "domestic hot water", "5+2", "Saturday - Sunday", "1)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/weekdaysandweekend/saturdaysunday/2"
+page = ["timers", "domestic hot water", "5+2"]
+path = ["timers", "domestic hot water", "5+2", "Saturday - Sunday", "2)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/weekdaysandweekend/saturdaysunday/3"
+page = ["timers", "domestic hot water", "5+2"]
+path = ["timers", "domestic hot water", "5+2", "Saturday - Sunday", "3)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/weekdaysandweekend/saturdaysunday/4"
+page = ["timers", "domestic hot water", "5+2"]
+path = ["timers", "domestic hot water", "5+2", "Saturday - Sunday", "4)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/weekdaysandweekend/saturdaysunday/5"
+page = ["timers", "domestic hot water", "5+2"]
+path = ["timers", "domestic hot water", "5+2", "Saturday - Sunday", "5)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/days/sunday/1"
+page = ["timers", "domestic hot water", "days (Mo, Tu...)"]
+path = ["timers", "domestic hot water", "days (Mo, Tu...)", "Sunday", "1)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/days/sunday/2"
+page = ["timers", "domestic hot water", "days (Mo, Tu...)"]
+path = ["timers", "domestic hot water", "days (Mo, Tu...)", "Sunday", "2)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/days/sunday/3"
+page = ["timers", "domestic hot water", "days (Mo, Tu...)"]
+path = ["timers", "domestic hot water", "days (Mo, Tu...)", "Sunday", "3)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/days/sunday/4"
+page = ["timers", "domestic hot water", "days (Mo, Tu...)"]
+path = ["timers", "domestic hot water", "days (Mo, Tu...)", "Sunday", "4)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/days/sunday/5"
+page = ["timers", "domestic hot water", "days (Mo, Tu...)"]
+path = ["timers", "domestic hot water", "days (Mo, Tu...)", "Sunday", "5)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/days/monday/1"
+page = ["timers", "domestic hot water", "days (Mo, Tu...)"]
+path = ["timers", "domestic hot water", "days (Mo, Tu...)", "Monday", "1)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/days/monday/2"
+page = ["timers", "domestic hot water", "days (Mo, Tu...)"]
+path = ["timers", "domestic hot water", "days (Mo, Tu...)", "Monday", "2)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/days/monday/3"
+page = ["timers", "domestic hot water", "days (Mo, Tu...)"]
+path = ["timers", "domestic hot water", "days (Mo, Tu...)", "Monday", "3)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/days/monday/4"
+page = ["timers", "domestic hot water", "days (Mo, Tu...)"]
+path = ["timers", "domestic hot water", "days (Mo, Tu...)", "Monday", "4)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/days/monday/5"
+page = ["timers", "domestic hot water", "days (Mo, Tu...)"]
+path = ["timers", "domestic hot water", "days (Mo, Tu...)", "Monday", "5)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/days/tuesday/1"
+page = ["timers", "domestic hot water", "days (Mo, Tu...)"]
+path = ["timers", "domestic hot water", "days (Mo, Tu...)", "Tuesday", "1)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/days/tuesday/2"
+page = ["timers", "domestic hot water", "days (Mo, Tu...)"]
+path = ["timers", "domestic hot water", "days (Mo, Tu...)", "Tuesday", "2)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/days/tuesday/3"
+page = ["timers", "domestic hot water", "days (Mo, Tu...)"]
+path = ["timers", "domestic hot water", "days (Mo, Tu...)", "Tuesday", "3)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/days/tuesday/4"
+page = ["timers", "domestic hot water", "days (Mo, Tu...)"]
+path = ["timers", "domestic hot water", "days (Mo, Tu...)", "Tuesday", "4)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/days/tuesday/5"
+page = ["timers", "domestic hot water", "days (Mo, Tu...)"]
+path = ["timers", "domestic hot water", "days (Mo, Tu...)", "Tuesday", "5)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/days/wednesday/1"
+page = ["timers", "domestic hot water", "days (Mo, Tu...)"]
+path = ["timers", "domestic hot water", "days (Mo, Tu...)", "Wednesday", "1)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/days/wednesday/2"
+page = ["timers", "domestic hot water", "days (Mo, Tu...)"]
+path = ["timers", "domestic hot water", "days (Mo, Tu...)", "Wednesday", "2)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/days/wednesday/3"
+page = ["timers", "domestic hot water", "days (Mo, Tu...)"]
+path = ["timers", "domestic hot water", "days (Mo, Tu...)", "Wednesday", "3)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/days/wednesday/4"
+page = ["timers", "domestic hot water", "days (Mo, Tu...)"]
+path = ["timers", "domestic hot water", "days (Mo, Tu...)", "Wednesday", "4)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/days/wednesday/5"
+page = ["timers", "domestic hot water", "days (Mo, Tu...)"]
+path = ["timers", "domestic hot water", "days (Mo, Tu...)", "Wednesday", "5)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/days/thursday/1"
+page = ["timers", "domestic hot water", "days (Mo, Tu...)"]
+path = ["timers", "domestic hot water", "days (Mo, Tu...)", "Thursday", "1)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/days/thursday/2"
+page = ["timers", "domestic hot water", "days (Mo, Tu...)"]
+path = ["timers", "domestic hot water", "days (Mo, Tu...)", "Thursday", "2)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/days/thursday/3"
+page = ["timers", "domestic hot water", "days (Mo, Tu...)"]
+path = ["timers", "domestic hot water", "days (Mo, Tu...)", "Thursday", "3)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/days/thursday/4"
+page = ["timers", "domestic hot water", "days (Mo, Tu...)"]
+path = ["timers", "domestic hot water", "days (Mo, Tu...)", "Thursday", "4)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/days/thursday/5"
+page = ["timers", "domestic hot water", "days (Mo, Tu...)"]
+path = ["timers", "domestic hot water", "days (Mo, Tu...)", "Thursday", "5)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/days/friday/1"
+page = ["timers", "domestic hot water", "days (Mo, Tu...)"]
+path = ["timers", "domestic hot water", "days (Mo, Tu...)", "Friday", "1)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/days/friday/2"
+page = ["timers", "domestic hot water", "days (Mo, Tu...)"]
+path = ["timers", "domestic hot water", "days (Mo, Tu...)", "Friday", "2)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/days/friday/3"
+page = ["timers", "domestic hot water", "days (Mo, Tu...)"]
+path = ["timers", "domestic hot water", "days (Mo, Tu...)", "Friday", "3)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/days/friday/4"
+page = ["timers", "domestic hot water", "days (Mo, Tu...)"]
+path = ["timers", "domestic hot water", "days (Mo, Tu...)", "Friday", "4)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/days/friday/5"
+page = ["timers", "domestic hot water", "days (Mo, Tu...)"]
+path = ["timers", "domestic hot water", "days (Mo, Tu...)", "Friday", "5)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/days/saturday/1"
+page = ["timers", "domestic hot water", "days (Mo, Tu...)"]
+path = ["timers", "domestic hot water", "days (Mo, Tu...)", "Saturday", "1)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/days/saturday/2"
+page = ["timers", "domestic hot water", "days (Mo, Tu...)"]
+path = ["timers", "domestic hot water", "days (Mo, Tu...)", "Saturday", "2)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/days/saturday/3"
+page = ["timers", "domestic hot water", "days (Mo, Tu...)"]
+path = ["timers", "domestic hot water", "days (Mo, Tu...)", "Saturday", "3)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/days/saturday/4"
+page = ["timers", "domestic hot water", "days (Mo, Tu...)"]
+path = ["timers", "domestic hot water", "days (Mo, Tu...)", "Saturday", "4)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/domestichotwater/days/saturday/5"
+page = ["timers", "domestic hot water", "days (Mo, Tu...)"]
+path = ["timers", "domestic hot water", "days (Mo, Tu...)", "Saturday", "5)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/swimmingpool/week/mondaysunday/1"
+page = ["timers", "swimming pool", "week"]
+path = ["timers", "swimming pool", "week", "Monday - Sunday", "1)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/swimmingpool/week/mondaysunday/2"
+page = ["timers", "swimming pool", "week"]
+path = ["timers", "swimming pool", "week", "Monday - Sunday", "2)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/swimmingpool/week/mondaysunday/3"
+page = ["timers", "swimming pool", "week"]
+path = ["timers", "swimming pool", "week", "Monday - Sunday", "3)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/swimmingpool/weekdaysandweekend/mondayfriday/1"
+page = ["timers", "swimming pool", "5+2"]
+path = ["timers", "swimming pool", "5+2", "Monday - Friday", "1)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/swimmingpool/weekdaysandweekend/mondayfriday/2"
+page = ["timers", "swimming pool", "5+2"]
+path = ["timers", "swimming pool", "5+2", "Monday - Friday", "2)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/swimmingpool/weekdaysandweekend/mondayfriday/3"
+page = ["timers", "swimming pool", "5+2"]
+path = ["timers", "swimming pool", "5+2", "Monday - Friday", "3)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/swimmingpool/weekdaysandweekend/saturdaysunday/1"
+page = ["timers", "swimming pool", "5+2"]
+path = ["timers", "swimming pool", "5+2", "Saturday - Sunday", "1)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/swimmingpool/weekdaysandweekend/saturdaysunday/2"
+page = ["timers", "swimming pool", "5+2"]
+path = ["timers", "swimming pool", "5+2", "Saturday - Sunday", "2)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/swimmingpool/weekdaysandweekend/saturdaysunday/3"
+page = ["timers", "swimming pool", "5+2"]
+path = ["timers", "swimming pool", "5+2", "Saturday - Sunday", "3)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/swimmingpool/days/sunday/1"
+page = ["timers", "swimming pool", "days (Mo, Tu...)"]
+path = ["timers", "swimming pool", "days (Mo, Tu...)", "Sunday", "1)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/swimmingpool/days/sunday/2"
+page = ["timers", "swimming pool", "days (Mo, Tu...)"]
+path = ["timers", "swimming pool", "days (Mo, Tu...)", "Sunday", "2)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/swimmingpool/days/sunday/3"
+page = ["timers", "swimming pool", "days (Mo, Tu...)"]
+path = ["timers", "swimming pool", "days (Mo, Tu...)", "Sunday", "3)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/swimmingpool/days/monday/1"
+page = ["timers", "swimming pool", "days (Mo, Tu...)"]
+path = ["timers", "swimming pool", "days (Mo, Tu...)", "Monday", "1)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/swimmingpool/days/monday/2"
+page = ["timers", "swimming pool", "days (Mo, Tu...)"]
+path = ["timers", "swimming pool", "days (Mo, Tu...)", "Monday", "2)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/swimmingpool/days/monday/3"
+page = ["timers", "swimming pool", "days (Mo, Tu...)"]
+path = ["timers", "swimming pool", "days (Mo, Tu...)", "Monday", "3)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/swimmingpool/days/tuesday/1"
+page = ["timers", "swimming pool", "days (Mo, Tu...)"]
+path = ["timers", "swimming pool", "days (Mo, Tu...)", "Tuesday", "1)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/swimmingpool/days/tuesday/2"
+page = ["timers", "swimming pool", "days (Mo, Tu...)"]
+path = ["timers", "swimming pool", "days (Mo, Tu...)", "Tuesday", "2)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/swimmingpool/days/tuesday/3"
+page = ["timers", "swimming pool", "days (Mo, Tu...)"]
+path = ["timers", "swimming pool", "days (Mo, Tu...)", "Tuesday", "3)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/swimmingpool/days/wednesday/1"
+page = ["timers", "swimming pool", "days (Mo, Tu...)"]
+path = ["timers", "swimming pool", "days (Mo, Tu...)", "Wednesday", "1)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/swimmingpool/days/wednesday/2"
+page = ["timers", "swimming pool", "days (Mo, Tu...)"]
+path = ["timers", "swimming pool", "days (Mo, Tu...)", "Wednesday", "2)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/swimmingpool/days/wednesday/3"
+page = ["timers", "swimming pool", "days (Mo, Tu...)"]
+path = ["timers", "swimming pool", "days (Mo, Tu...)", "Wednesday", "3)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/swimmingpool/days/thursday/1"
+page = ["timers", "swimming pool", "days (Mo, Tu...)"]
+path = ["timers", "swimming pool", "days (Mo, Tu...)", "Thursday", "1)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/swimmingpool/days/thursday/2"
+page = ["timers", "swimming pool", "days (Mo, Tu...)"]
+path = ["timers", "swimming pool", "days (Mo, Tu...)", "Thursday", "2)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/swimmingpool/days/thursday/3"
+page = ["timers", "swimming pool", "days (Mo, Tu...)"]
+path = ["timers", "swimming pool", "days (Mo, Tu...)", "Thursday", "3)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/swimmingpool/days/friday/1"
+page = ["timers", "swimming pool", "days (Mo, Tu...)"]
+path = ["timers", "swimming pool", "days (Mo, Tu...)", "Friday", "1)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/swimmingpool/days/friday/2"
+page = ["timers", "swimming pool", "days (Mo, Tu...)"]
+path = ["timers", "swimming pool", "days (Mo, Tu...)", "Friday", "2)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/swimmingpool/days/friday/3"
+page = ["timers", "swimming pool", "days (Mo, Tu...)"]
+path = ["timers", "swimming pool", "days (Mo, Tu...)", "Friday", "3)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/swimmingpool/days/saturday/1"
+page = ["timers", "swimming pool", "days (Mo, Tu...)"]
+path = ["timers", "swimming pool", "days (Mo, Tu...)", "Saturday", "1)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/swimmingpool/days/saturday/2"
+page = ["timers", "swimming pool", "days (Mo, Tu...)"]
+path = ["timers", "swimming pool", "days (Mo, Tu...)", "Saturday", "2)"]
+type = "timer"
+
+[[readings]]
+topic = "timers/swimmingpool/days/saturday/3"
+page = ["timers", "swimming pool", "days (Mo, Tu...)"]
+path = ["timers", "swimming pool", "days (Mo, Tu...)", "Saturday", "3)"]
+type = "timer"

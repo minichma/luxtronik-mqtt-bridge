@@ -1,0 +1,24 @@
+# Copy the config directory outside the checkout and rename to base.toml.
+mappings_dir = "mappings"
+
+[luxtronik]
+password_file_env = "LUXTRONIK_PASSWORD_FILE"
+poll_interval_seconds = 30
+operation_timeout_seconds = 10
+stale_after_seconds = 120
+schedules_interval_seconds = 300
+max_frame_bytes = 1048576
+writes = true
+
+[mqtt]
+host = "mqtt.example.invalid"
+port = 1883
+tls = false
+verify_certificate = true
+authentication = "none"
+username_file_env = "MQTT_USERNAME_FILE"
+password_file_env = "MQTT_PASSWORD_FILE"
+topic_root = "luxtronik"
+
+[runtime]
+state_dir = "/var/lib/luxtronik-mqtt-bridge"

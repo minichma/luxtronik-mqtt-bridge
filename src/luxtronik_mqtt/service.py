@@ -1,10 +1,11 @@
-"""Reconnect and freshness lifecycle; no sample queue or stale replay."""
+"""Polling, serialized command handling, reconnects, and bounded shutdown."""
 
 import asyncio
 import contextlib
 import logging
 import random
 import time
+from dataclasses import dataclass
 
 import aiomqtt
 from websockets.exceptions import WebSocketException
@@ -12,17 +13,48 @@ from websockets.exceptions import WebSocketException
 from .compat import timeout
 from .config import ConfigError, Secrets, Settings
 from .controller import Controller
-from .model import normalize, utc_now
-from .protocol import AuthenticationError, ProtocolError
-from .publisher import Publisher, mqtt_client
+from .model import normalize
+from .protocol import AuthenticationError, CommandError, ProtocolError
+from .publisher import Publisher, mqtt_client, subscribe_commands
 
 LOG = logging.getLogger(__name__)
 CONTROLLER_ERRORS = (OSError, asyncio.TimeoutError, ProtocolError, WebSocketException)
 
 
-def retry_delay(attempt: int, *, authentication: bool = False) -> float:
+@dataclass(frozen=True)
+class Command:
+    key: str
+    payload: bytes
+    received: float
+
+
+def retry_delay(attempt, *, authentication=False):
     floor = 30 if authentication else min(2 ** min(attempt, 6), 48)
     return min(60, random.uniform(floor, floor * 1.25))
+
+
+def normalized(config, raw):
+    return {
+        s.key: normalize(s, raw[s.key], writes=config.writes)
+        for s in config.sensors
+        if s.key in raw
+    }
+
+
+async def wait_for_command(controller, commands, delay):
+    idle = asyncio.create_task(controller.idle(delay))
+    incoming = asyncio.create_task(commands.get())
+    try:
+        done, _ = await asyncio.wait((idle, incoming), return_when=asyncio.FIRST_COMPLETED)
+        if idle in done:
+            idle.result()
+        if incoming in done:
+            return incoming.result()
+        return None
+    finally:
+        for task in (idle, incoming):
+            task.cancel()
+        await asyncio.gather(idle, incoming, return_exceptions=True)
 
 
 async def controller_loop(
@@ -34,19 +66,25 @@ async def controller_loop(
     controller_factory=Controller,
     on_success=None,
     stopping=None,
+    commands=None,
+    ready=None,
 ):
     stopping = stopping or asyncio.Event()
+    commands = commands or asyncio.Queue(maxsize=16)
+    ready = ready or asyncio.Event()
     attempt = 0
+    specs = {s.key: s for s in config.sensors}
     while not stopping.is_set():
         try:
             async with controller_factory(config, secrets.controller) as controller:
                 last_success = None
+                initial = True
                 while not stopping.is_set():
                     start = time.monotonic()
                     remaining = (
                         config.stale
                         if last_success is None
-                        else (config.stale - (start - last_success))
+                        else config.stale - (start - last_success)
                     )
                     if remaining <= 0:
                         raise asyncio.TimeoutError
@@ -54,24 +92,48 @@ async def controller_loop(
                         raw = await controller.sample()
                         if stopping.is_set():
                             return
-                        observed = utc_now()
-                        values = {
-                            s.key: normalize(s, raw.get(s.path), observed) for s in config.sensors
-                        }
-                        await publisher.cycle(values)
+                        await publisher.cycle(normalized(config, raw), initial=initial)
                         if stopping.is_set():
                             return
                         await publisher.availability(True)
+                    initial = False
                     last_success = time.monotonic()
+                    ready.set()
                     attempt = 0
-                    if on_success is not None:
+                    if on_success:
                         on_success()
-                    LOG.info("Published %d readings", len(values))
-                    if once or stopping.is_set():
+                    if once:
                         return
-                    await controller.idle(max(0, config.poll - (time.monotonic() - start)))
+                    deadline = start + config.poll
+                    while not stopping.is_set() and time.monotonic() < deadline:
+                        command = await wait_for_command(
+                            controller, commands, deadline - time.monotonic()
+                        )
+                        if command is None:
+                            break
+                        if time.monotonic() - command.received > config.timeout:
+                            await publisher.restore_scalar(command.key)
+                            await publisher.command_result(command.key, "expired")
+                            continue
+                        try:
+                            async with timeout(config.timeout * 3):
+                                status = await controller.write(specs[command.key], command.payload)
+                            await publisher.cycle(normalized(config, controller.values()))
+                            await publisher.restore_scalar(command.key)
+                            await publisher.command_result(command.key, status)
+                        except CommandError as exc:
+                            await publisher.restore_scalar(command.key)
+                            await publisher.command_result(command.key, str(exc))
+                            LOG.warning("Controller command rejected")
+                        except CONTROLLER_ERRORS:
+                            await publisher.command_result(command.key, "outcome_unknown")
+                            raise
         except CONTROLLER_ERRORS as exc:
-            # Never log exception text: transport errors can contain frame contents.
+            ready.clear()
+            # Never retain commands across controller sessions or retry uncertain writes.
+            while not commands.empty():
+                discarded = commands.get_nowait()
+                await publisher.command_result(discarded.key, "disconnected")
             await publisher.availability(False)
             if stopping.is_set():
                 return
@@ -84,37 +146,66 @@ async def controller_loop(
             attempt += 1
 
 
-async def _watch_broker(client):
-    # No subscriptions; the iterator unblocks on broker disconnection.
-    async for _ in client.messages:
-        pass
+async def watch_broker(client, config, publisher, commands, ready):
+    allowed = {s.key for s in config.sensors}
+    prefix = config.prefix + "/"
+    async for message in client.messages:
+        topic = str(message.topic)
+        if not topic.startswith(prefix) or not topic.endswith("/value"):
+            continue
+        key = topic[len(prefix) : -len("/value")]
+        if key not in allowed:
+            continue
+        if message.retain:
+            await publisher.restore_scalar(key)
+            await publisher.command_result(key, "retained_command_rejected")
+            continue
+        if not config.writes or not ready.is_set():
+            await publisher.restore_scalar(key)
+            await publisher.command_result(key, "offline")
+            continue
+        payload = bytes(message.payload)
+        if not 1 <= len(payload) <= 256:
+            await publisher.restore_scalar(key)
+            await publisher.command_result(key, "invalid_payload")
+            continue
+        try:
+            commands.put_nowait(Command(key, payload, time.monotonic()))
+        except asyncio.QueueFull:
+            await publisher.restore_scalar(key)
+            await publisher.command_result(key, "busy")
     raise aiomqtt.MqttError("Broker disconnected")
 
 
 async def _connected(config, secrets, client, *, once, on_success=None):
-    # Older asyncio.wait_for implementations (also used inside MQTT libraries)
-    # can consume cancellation when an acknowledgement races with shutdown.
-    # A cooperative flag prevents the polling worker from starting another cycle.
-    stopping = asyncio.Event()
+    stopping, ready = asyncio.Event(), asyncio.Event()
     publisher = Publisher(client, config, stopping)
+    commands = asyncio.Queue(maxsize=16)
     await publisher.availability(False)
     tasks = []
     try:
-        await publisher.prepare()
+        await subscribe_commands(client, config)
         worker = asyncio.create_task(
             controller_loop(
-                config, secrets, publisher, once=once, on_success=on_success, stopping=stopping
+                config,
+                secrets,
+                publisher,
+                once=once,
+                on_success=on_success,
+                stopping=stopping,
+                commands=commands,
+                ready=ready,
             )
         )
-        watcher = asyncio.create_task(_watch_broker(client))
+        watcher = asyncio.create_task(watch_broker(client, config, publisher, commands, ready))
         tasks = [worker, watcher]
         done, _ = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
-        # Prefer broker errors if both tasks completed simultaneously.
         for task in (watcher, worker):
             if task in done:
                 task.result()
     finally:
         stopping.set()
+        ready.clear()
         for task in tasks:
             task.cancel()
         await asyncio.gather(*tasks, return_exceptions=True)
@@ -124,7 +215,7 @@ async def _connected(config, secrets, client, *, once, on_success=None):
 
 async def run(config: Settings, secrets: Secrets, *, once=False):
     if not config.sensors:
-        raise ConfigError("Configure at least one sensor before publishing")
+        raise ConfigError("Configure at least one mapping")
     attempt = 0
 
     def succeeded():
@@ -140,6 +231,5 @@ async def run(config: Settings, secrets: Secrets, *, once=False):
             LOG.warning("Broker unavailable (%s)", type(exc).__name__)
             if once:
                 raise
-            # MQTT reconnect always creates a new controller session and fresh cycle.
             await asyncio.sleep(retry_delay(attempt))
             attempt += 1
