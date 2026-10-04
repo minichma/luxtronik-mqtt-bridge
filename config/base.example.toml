@@ -1,5 +1,5 @@
 # Copy the config directory outside the checkout and rename to base.toml.
-mappings_dir = "mappings"
+# Language mappings are bundled with the application.
 
 [luxtronik]
 password_file_env = "LUXTRONIK_PASSWORD_FILE"

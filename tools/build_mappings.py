@@ -221,7 +221,7 @@ def main(source):
                         + " }"
                     )
                 output[lang].extend(lines)
-    destination = Path("config/mappings")
+    destination = Path(__file__).resolve().parents[1] / "src/luxtronik_mqtt/mappings"
     destination.mkdir(parents=True, exist_ok=True)
     for lang, lines in output.items():
         (destination / (lang + ".toml")).write_text(

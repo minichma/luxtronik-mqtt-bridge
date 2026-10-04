@@ -1,5 +1,13 @@
 # Validation record
 
+Bundled-mapping change: 57 configuration/model/controller/service tests pass,
+including loading with an invalid external mapping copy present. Both 271-entry
+language catalogs load directly from the built 0.2.0 wheel in an isolated process,
+without checkout or config-directory mappings. Ruff lint/format and wheel build
+pass. The full suite stalled during disposable broker startup and was stopped;
+MQTT integration was not revalidated for this change. The new wheel has not been
+deployed to the live bridge services.
+
 As of 2026-10-03:
 
 - **59 tests pass** on Windows/Python 3.13 and Linux/Python 3.11. Real Mosquitto 2

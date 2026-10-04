@@ -9,11 +9,11 @@ change as the implementation or deployment work. Review both before finishing:
 update AGENTS for architecture, module responsibilities, invariants, workflow, and
 handoff information; update README for user-visible behavior, configuration,
 commands, compatibility, and limitations. Do not leave contradictory instructions.
-Keep PLAN.md concise and update affected docs/examples when their claims change.
+Update affected docs/examples when their claims change.
 Record evidence and outstanding verification in docs/validation.md, with dates;
 distinguish files installed, service running, and behavior actually verified.
 
-At the start of work, read this file, README.md, PLAN.md, and relevant detailed docs;
+At the start of work, read this file, README.md, and relevant detailed docs;
 inspect git status and existing changes before editing. Preserve unrelated work.
 Use the structure below when extending the project; avoid parallel implementations,
 temporary diagnostics in production code, and reorganizations without a concrete
@@ -33,12 +33,13 @@ contain site configuration; never copy secrets or raw captures into documentatio
 | `publisher.py` | MQTT connection/subscription options, retained state, change detection, topic manifest |
 | `service.py` | Read/command orchestration, reconnects, availability, cancellation and shutdown |
 | `compat.py`, `logging_config.py` | Platform/runtime compatibility and bounded logging |
-| `config/` | Generic base/device examples and paired language catalogs; no actual site config |
+| `config/` | Generic base/device examples; no actual site config |
+| `src/luxtronik_mqtt/mappings/` | Versioned German/English catalogs bundled in the wheel |
 | `deploy/` | Versioned-release installer and systemd template |
 | `tests/` | Unit/controller/service tests, disposable broker integration, sanitized bilingual fixtures |
 | `tools/` | Offline mapping builder and Windows launcher; no credentials or live capture output |
 | `examples/openhab/` | Generic consumer examples, separate from the deployed site configuration |
-| `docs/`, `PLAN.md` | Protocol evidence, deployment/secrets/validation guides, concise remaining work |
+| `docs/` | Protocol evidence, deployment/secrets/validation guides, concise remaining work |
 
 Module filenames without a directory above are under `src/luxtronik_mqtt/`.
 Keep protocol/model logic independent of MQTT transport; service coordinates the
@@ -76,12 +77,19 @@ provide liveness checks. Bound frame size (1 MiB), depth, item count, and queues
 
 ## Configuration and language mappings
 
-Keep actual configuration and credentials outside source. Three layers:
-- Shared base: broker, timing, write enablement, mapping directory, state root.
-- Language mappings: full localized paths, page selection, canonical English
+Keep actual configuration and credentials outside source. Two external configuration
+layers plus bundled language mappings:
+- Shared base: broker, timing, write enablement, state root.
+- Bundled language mappings: full localized paths, page selection, canonical English
   hierarchical topic IDs, types, units, and English choice translations.
 - Per-device file: base reference, stable ID, controller URL, language, and optional
   controller/runtime overrides. Derive MQTT prefix/client ID/state directory from ID.
+
+Load catalogs using importlib.resources from the installed package, independent of
+working directory and config location. Never require or deploy external mapping
+copies. The legacy mappings_dir key is validated as text but ignored for compatibility;
+new configs omit it. Keep catalogs in source and verify both are included in built
+wheels. Mapping changes and rollback follow the application release.
 
 Use paired German/English controller captures as the primary naming source. Expand
 abbreviations using the manufacturer glossary; lowercase alphanumeric topic levels

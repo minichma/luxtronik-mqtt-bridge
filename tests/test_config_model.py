@@ -64,6 +64,16 @@ def test_language_catalogs_cover_all_fixture_readings(config_files):
     assert len(topic_sets[0]) == 271
 
 
+def test_bundled_mappings_ignore_legacy_external_directory(config_files, monkeypatch):
+    base = config_files / "base.toml"
+    base.write_text('mappings_dir = "mappings"\n' + base.read_text("utf-8"), encoding="utf-8")
+    external = config_files / "mappings"
+    external.mkdir()
+    (external / "de.toml").write_text("invalid external TOML", encoding="utf-8")
+    monkeypatch.chdir(config_files)
+    assert len(load_config(config_files / "device.toml").sensors) == 271
+
+
 @pytest.mark.parametrize(
     "before,after",
     [

@@ -13,24 +13,26 @@ English captures**. FW 3.92 remains unverified; no legacy API fallback is used.
 
 ## Configuration
 
-Copy the [configuration examples](config/base.example.toml) and mappings outside
+Copy the [configuration examples](config/base.example.toml) outside
 source, using this layout:
 
 ```text
 config/
   base.toml                 # shared MQTT, timing, state root
-  mappings/de.toml          # German controller paths
-  mappings/en.toml          # English controller paths, identical topic IDs
   devices/heatpump1.toml
   devices/heatpump2.toml
 ```
 
 Each device file references `../base.toml`. MQTT prefixes, client IDs, and state
 subdirectories derive from the device ID, so MQTT settings are shared. The catalogs
+are bundled as package resources in `src/luxtronik_mqtt/mappings/` and
 contain **271 mappings** from the captured hardware; each pump publishes only its
 available fields. English abbreviations are expanded in topic IDs, and numbered
 circuits use numeric subtopics. Actual credentials live in protected external files;
-see [secrets](docs/secrets.md).
+see [secrets](docs/secrets.md). Language selects the bundled catalog; no mappings
+need copying into the config directory. The legacy `mappings_dir` key is accepted
+but ignored; remove it from existing base files when convenient. Mapping updates
+and rollbacks travel with the application release.
 
 ```sh
 uv sync --locked
@@ -135,7 +137,8 @@ uv build
 ```
 
 [AGENTS.md](AGENTS.md) records module responsibilities, architectural decisions and
-maintenance rules; [PLAN.md](PLAN.md) records remaining work. Keep AGENTS.md and this
+maintenance rules; [validation](docs/validation.md) records remaining verification.
+Keep AGENTS.md and this
 README current with every relevant implementation, configuration or deployment
 change, and update affected detailed documentation and examples in the same change.
 See [protocol evidence](docs/protocol-research.md) and [validation](docs/validation.md).

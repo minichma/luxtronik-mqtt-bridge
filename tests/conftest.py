@@ -1,5 +1,4 @@
 import asyncio
-import shutil
 import sys
 from dataclasses import replace
 from pathlib import Path
@@ -18,7 +17,6 @@ def pytest_asyncio_loop_factories():
 @pytest.fixture
 def config_files(tmp_path):
     source = Path(__file__).parents[1] / "config"
-    shutil.copytree(source / "mappings", tmp_path / "mappings")
     text = (
         (source / "base.example.toml")
         .read_text("utf-8")

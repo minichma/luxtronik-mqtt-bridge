@@ -6,6 +6,7 @@ import math
 import os
 import re
 from dataclasses import dataclass, field
+from importlib.resources import files
 from pathlib import Path
 from urllib.parse import urlsplit
 
@@ -146,8 +147,10 @@ def load_config(path: Path) -> Settings:
     language = _text(device, "language", "de")
     if language not in ("de", "en"):
         raise ConfigError("Supported languages: de, en")
-    mapping_path = base_path.parent / _text(raw, "mappings_dir", "mappings") / (language + ".toml")
-    mapping = _read(mapping_path)
+    # Accepted only for compatibility with existing base files; never load site mappings.
+    if "mappings_dir" in raw:
+        _text(raw, "mappings_dir")
+    mapping = _read(files("luxtronik_mqtt").joinpath("mappings").joinpath(language + ".toml"))
     _fields(mapping, "language information_label readings")
     if mapping.get("language") != language:
         raise ConfigError("Mapping language mismatch")

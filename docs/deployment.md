@@ -6,16 +6,19 @@ no broker or system-Python upgrade is required.
 
 ## Configuration layout
 
-Copy `config/base.example.toml` to an external `base.toml`, copy `config/mappings`,
+Copy `config/base.example.toml` to an external `base.toml`
 and copy each device example to `devices/<id>.toml`. Set the shared broker/state
 root and each device's URL/language. A device's ID determines its MQTT namespace,
-client ID, and state subdirectory. Both supplied language catalogs use identical
+client ID, and state subdirectory. Both bundled language catalogs use identical
 English topic IDs. Changing the controller language requires updating its device
-file and restarting that instance.
+file and restarting that instance. Mappings remain in application source and are
+packaged in the wheel; no config-directory copy is needed. Existing mappings_dir
+settings are ignored and may be removed. Old external mapping copies are unused
+by the new loader; retain them if an older release needs them for rollback.
 
 ## Windows
 
-Use `%LOCALAPPDATA%\LuxtronikMqtt\config\` for the base, mappings, and devices.
+Use `%LOCALAPPDATA%\LuxtronikMqtt\config\` for the base and device files.
 Set `runtime.state_dir` to an absolute Windows path (forward slashes in TOML work).
 Keep credentials under the protected external `secrets` directory. The helper
 `tools/run-windows.ps1` defaults to the `heatpump_old` device file:
@@ -32,7 +35,7 @@ and does not connect to MQTT. Never run two publishers for the same device ID.
 
 ## openHABian
 
-Use `/etc/luxtronik-mqtt-bridge/{base.toml,mappings/,devices/}` and the state root
+Use `/etc/luxtronik-mqtt-bridge/{base.toml,devices/}` and the state root
 `/var/lib/luxtronik-mqtt-bridge`. Provision root-owned 0600 credentials under
 `/etc/luxtronik-mqtt-bridge/secrets/<id>-controller-password` (directory 0700).
 The template maps each into its private systemd credential directory as
@@ -48,7 +51,7 @@ sudo sh /absolute/staging/install.sh /absolute/staging heatpump_new heatpump_old
 
 The installer builds a versioned virtualenv without replacing system Python,
 validates staged and installed config, preserves existing base/device config,
-updates language mappings, then activates each template instance. The original
+loads mappings bundled in the wheel, then activates each template instance. The original
 single-instance service is stopped/disabled. Previous virtualenv releases and the
 original `.venv` are retained for rollback. Review MQTT state after activation.
 
@@ -72,7 +75,7 @@ contains only absolute paths, never credential values.
 
 A service instance uses `/opt/luxtronik-mqtt-bridge/current/bin/python`. To roll
 back, stop both instances, point `current` to the prior release, restore its matching
-base/mappings/device files, then restart and check MQTT availability. Keep copies
+base/device files, then restart and check MQTT availability. Keep copies
 of configuration when making schema changes. The installer preserves releases,
 but does not automatically roll back after a failed hardware connection.
 

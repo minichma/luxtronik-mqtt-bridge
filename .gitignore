@@ -12,10 +12,6 @@ secrets/
 *.local.*
 config/*
 !config/*.example.toml
-!config/mappings/
-config/mappings/*
-!config/mappings/de.toml
-!config/mappings/en.toml
 !config/devices/
 config/devices/*
 !config/devices/*.example.toml

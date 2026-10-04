@@ -1,5 +1,5 @@
 #!/bin/sh
-# Staging: wheel, requirements.lock, template unit, config/{base.toml,devices,mappings}.
+# Staging: wheel, requirements.lock, template unit, config/{base.toml,devices}.
 # Secrets must already exist under /etc/luxtronik-mqtt-bridge/secrets/<id>-controller-password.
 set -eu
 test "$(id -u)" -eq 0 || { echo 'Run with sudo.' >&2; exit 1; }
@@ -15,7 +15,7 @@ for id in "$@"; do
     test -f "$staging/config/devices/$id.toml"
     test -f "$config/secrets/$id-controller-password"
 done
-for file in "$wheel" "$staging/requirements.lock" "$staging/luxtronik-mqtt-bridge@.service"             "$staging/config/base.toml" "$staging/config/mappings/de.toml" "$staging/config/mappings/en.toml"; do
+for file in "$wheel" "$staging/requirements.lock" "$staging/luxtronik-mqtt-bridge@.service"             "$staging/config/base.toml"; do
     test -f "$file" || { echo 'Missing staging file.' >&2; exit 1; }
 done
 python3 -c 'import sys; assert sys.version_info >= (3, 9)'
@@ -23,7 +23,7 @@ if ! getent passwd luxtronik-mqtt >/dev/null; then
     useradd --system --no-log-init --user-group --home-dir "$state" --shell /usr/sbin/nologin luxtronik-mqtt
 fi
 install -d -o root -g root -m 755 "$app/releases"
-install -d -o root -g luxtronik-mqtt -m 750 "$config" "$config/devices" "$config/mappings"
+install -d -o root -g luxtronik-mqtt -m 750 "$config" "$config/devices"
 install -d -o luxtronik-mqtt -g luxtronik-mqtt -m 700 "$state"
 release="$app/releases/$(date -u +%Y%m%dT%H%M%SZ)"
 test ! -e "$release"
@@ -37,7 +37,7 @@ install -m 644 "$staging/requirements.lock" "$release/requirements.lock"
 for id in "$@"; do
     LUXTRONIK_PASSWORD_FILE="$config/secrets/$id-controller-password"         "$release/bin/python" -m luxtronik_mqtt --config "$staging/config/devices/$id.toml" check
 done
-# Preserve operator-maintained base/device files; mappings are versioned artifacts.
+# Preserve operator-maintained base/device files; mappings are bundled in the release.
 if ! test -e "$config/base.toml"; then
     install -o root -g luxtronik-mqtt -m 640 "$staging/config/base.toml" "$config/base.toml"
 fi
@@ -47,8 +47,6 @@ for id in "$@"; do
     fi
     install -d -o luxtronik-mqtt -g luxtronik-mqtt -m 700 "$state/$id"
 done
-install -o root -g luxtronik-mqtt -m 640 "$staging/config/mappings/de.toml" "$config/mappings/de.toml"
-install -o root -g luxtronik-mqtt -m 640 "$staging/config/mappings/en.toml" "$config/mappings/en.toml"
 for id in "$@"; do
     LUXTRONIK_PASSWORD_FILE="$config/secrets/$id-controller-password"         "$release/bin/python" -m luxtronik_mqtt --config "$config/devices/$id.toml" check
 done
